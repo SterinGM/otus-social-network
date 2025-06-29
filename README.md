@@ -22,7 +22,7 @@ docker-compose exec php composer install
 Если вам необходимо создать БД, то выполните команду
 
 ```bash
-docker-compose exec php bin/console doctrine:database:create
+docker-compose exec php bin/console doctrine:database:create --if-not-exists
 ```
 Для применения миграций выполните команду
 
