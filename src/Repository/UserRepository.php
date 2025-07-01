@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -60,7 +62,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->executeQuery();
     }
 
-    public function getById(string $id): ?array
+    public function getById(string $id): ?User
     {
         $sql = 'SELECT * FROM user WHERE id = :id';
 
@@ -68,6 +70,25 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->bindValue('id', $id);
         $result = $statement->executeQuery();
 
-        return $result->rowCount() ? $result->fetchAssociative() : null;
+        return $this->mapUser($result);
+    }
+
+    private function mapUser(Result $result): ?User
+    {
+        if (!$result->rowCount()) {
+            return null;
+        }
+
+        $data = $result->fetchAssociative();
+        $birthdate = DateTimeImmutable::createFromFormat(UserRepository::BIRTHDATE_FORMAT, $data['birthdate']);
+
+        return new User()
+            ->setId($data['id'])
+            ->setFirstName($data['first_name'])
+            ->setSecondName($data['second_name'])
+            ->setBirthdate($birthdate)
+            ->setBiography($data['biography'])
+            ->setCity($data['city'])
+            ->setPassword($data['password']);
     }
 }

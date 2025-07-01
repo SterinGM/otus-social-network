@@ -41,7 +41,7 @@ class ExceptionListener
         if ($exception instanceof ExceptionInterface) {
             $this->logger->warning($exception->getMessage(), $exception->getTrace());
             $message = $exception->getTranslationMessage()?->trans($this->translator) ?? $exception->getMessage();
-            $response = $this->getJsonResponse($event->getRequest(), $message, $exception->getErrorCode());
+            $response = $this->getJsonResponse($event->getRequest(), $message, $exception->getErrorCode(), Response::HTTP_NOT_FOUND);
             $event->setResponse($response);
 
             return;
