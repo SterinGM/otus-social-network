@@ -34,6 +34,8 @@ class Login
             throw new InvalidCredentialsException();
         }
 
+        $this->apiTokenRepository->clearUserTokens($user->getId());
+
         $apiToken = $this->getTokenFromRequest($loginRequest);
 
         $this->apiTokenRepository->create($apiToken);
