@@ -15,6 +15,8 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
+    public const string BIRTHDATE_FORMAT = 'Y-m-d';
+
     private Connection $connection;
 
     public function __construct(ManagerRegistry $registry)
@@ -52,9 +54,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->bindValue('roles', json_encode($user->getRoles()));
         $statement->bindValue('firstName', $user->getFirstName());
         $statement->bindValue('secondName', $user->getSecondName());
-        $statement->bindValue('birthdate', $user->getBirthdate()->format('Y-m-d'));
+        $statement->bindValue('birthdate', $user->getBirthdate()->format(self::BIRTHDATE_FORMAT));
         $statement->bindValue('biography', $user->getBiography());
         $statement->bindValue('city', $user->getCity());
         $statement->executeQuery();
+    }
+
+    public function getById(string $id): ?array
+    {
+        $sql = 'SELECT * FROM user WHERE id = :id';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('id', $id);
+        $result = $statement->executeQuery();
+
+        return $result->rowCount() ? $result->fetchAssociative() : null;
     }
 }

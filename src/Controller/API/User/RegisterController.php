@@ -6,17 +6,13 @@ use App\DTO\User\Request\RegisterRequest;
 use App\DTO\User\Response\RegisterResponse;
 use App\Service\ApiJsonResponse;
 use App\Service\User\Registration;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-class RegisterController extends AbstractController
+class RegisterController
 {
     private Registration $registration;
 
-    /**
-     * @param Registration $registration
-     */
     public function __construct(Registration $registration)
     {
         $this->registration = $registration;
