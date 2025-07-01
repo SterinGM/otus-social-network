@@ -1,0 +1,13 @@
+# Common
+server_error: Ошибка сервера!!!
+invalid_params: Неверные параметры.
+
+# Token
+token_not_found: Токен не найден.
+
+# User
+user_not_found: Пользователь %id% не найден.
+
+# Authentication
+invalid_credentials: Неверный логин или пароль.
+authentication_required: Необходимо авторизоваться.

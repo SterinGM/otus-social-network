@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+    nginx:
+        container_name: socnet-nginx
+        image: nginx:1.28.0-alpine
+        working_dir: /var/www/app
+        depends_on:
+            - php
+        ports:
+            - 127.0.0.1:8089:80
+        volumes:
+            - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+            - .:/var/www/app
+
+    php:
+        container_name: socnet-php
+        build: ./docker/php/
+        working_dir: /var/www/app
+        depends_on:
+            - mariadb
+        environment:
+            TIMEZONE: Europe/Moscow
+            COMPOSER_MEMORY_LIMIT: -1
+        volumes:
+            - .:/var/www/app
+
+    mariadb:
+        container_name: socnet-db
+        image: mariadb:11.7.2
+        restart: always
+        env_file:
+            - ./.env
+            - ./.env.local
+        ports:
+            - 127.0.0.1:3309:3306
+        volumes:
+            - ./var/lib/mysql-data:/var/lib/mysql
