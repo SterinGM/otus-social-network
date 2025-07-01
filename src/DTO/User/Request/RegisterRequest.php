@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\User\Request;
 
-class RegisterDTO
+class RegisterRequest
 {
     public const string FIELD_FIRST_NAME = 'first_name';
     public const string FIELD_SECOND_NAME = 'second_name';
