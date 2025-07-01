@@ -1,8 +1,8 @@
 <?php
 
-namespace App\DTO\User\Resolver;
+namespace App\DTO\Auth\Resolver;
 
-use App\DTO\User\Request\RegisterRequest;
+use App\DTO\Auth\Request\LoginRequest;
 use App\Service\ErrorSystem\Errors;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class RegisterResolver implements ValueResolverInterface
+class LoginResolver implements ValueResolverInterface
 {
     private ValidatorInterface $validator;
 
@@ -22,7 +22,7 @@ class RegisterResolver implements ValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        if (RegisterRequest::class !== $argument->getType()) {
+        if (LoginRequest::class !== $argument->getType()) {
             return;
         }
 
@@ -35,18 +35,14 @@ class RegisterResolver implements ValueResolverInterface
             throw new BadRequestHttpException();
         }
 
-        yield RegisterRequest::createFromArray($data);
+        yield LoginRequest::createFromArray($data);
     }
 
     private function validate(array $data): array
     {
         $constraint = new Assert\Collection(fields: [
-            RegisterRequest::FIELD_FIRST_NAME => new Assert\Length(min: 3, max: 50),
-            RegisterRequest::FIELD_SECOND_NAME => new Assert\Length(min: 3, max: 50),
-            RegisterRequest::FIELD_BIRTH_DATE => new Assert\Date(),
-            RegisterRequest::FIELD_BIOGRAPHY => new Assert\Length(min: 3),
-            RegisterRequest::FIELD_CITY => new Assert\Length(min: 3),
-            RegisterRequest::FIELD_PASSWORD => new Assert\Length(min: 3),
+            LoginRequest::FIELD_ID => new Assert\Uuid(),
+            LoginRequest::FIELD_PASSWORD => new Assert\Length(min: 3),
         ]);
 
         $violations = $this->validator->validate($data, $constraint);

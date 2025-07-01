@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\ApiToken;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -18,9 +19,13 @@ class ApiTokenRepository extends ServiceEntityRepository
 {
     private const string DATE_FORMAT = 'Y-m-d H:i:s';
 
+    private Connection $connection;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ApiToken::class);
+
+        $this->connection = $this->getEntityManager()->getConnection();
     }
 
     public function create(ApiToken $token): void
