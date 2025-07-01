@@ -1,0 +1,13 @@
+# Common
+server_error: Server error!!!
+invalid_params: Invalid params.
+
+# Token
+token_not_found: Token not found.
+
+# User
+user_not_found: User %id% not found.
+
+# Authentication
+invalid_credentials: Invalid Credentials.
+authentication_required: Authentication Required.
