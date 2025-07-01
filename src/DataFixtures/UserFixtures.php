@@ -2,8 +2,8 @@
 
 namespace App\DataFixtures;
 
-use App\DTO\RegisterDTO;
-use App\Service\Registration;
+use App\DTO\User\Request\RegisterRequest;
+use App\Service\User\Registration;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -27,8 +27,8 @@ class UserFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $registerDto = RegisterDTO::createFromArray(self::TEST_USER);
+        $registerRequest = RegisterRequest::createFromArray(self::TEST_USER);
 
-        $this->registration->registerUser($registerDto);
+        $this->registration->registerUser($registerRequest);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\User;
 
-use App\DTO\RegisterDTO;
+use App\DTO\User\Request\RegisterRequest;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
@@ -20,15 +20,15 @@ class Registration
         $this->userRepository = $userRepository;
     }
 
-    public function registerUser(RegisterDTO $registerDTO): string {
-        $user = $this->getUserFromDTO($registerDTO);
+    public function registerUser(RegisterRequest $registerRequest): User {
+        $user = $this->getUserFromDTO($registerRequest);
 
         $this->userRepository->createUser($user);
 
-        return $user->getUserIdentifier();
+        return $user;
     }
 
-    private function getUserFromDTO(RegisterDTO $registerDTO): User
+    private function getUserFromDTO(RegisterRequest $registerDTO): User
     {
         $birthdate = new DateTimeImmutable($registerDTO->birthdate);
         $user = new User()
