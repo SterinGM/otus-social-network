@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\DTO\RegisterDTO;
-use App\Service\Registration;
+use App\Service\User\Registration;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 

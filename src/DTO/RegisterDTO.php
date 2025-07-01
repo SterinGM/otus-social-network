@@ -4,6 +4,13 @@ namespace App\DTO;
 
 class RegisterDTO
 {
+    public const string FIELD_FIRST_NAME = 'first_name';
+    public const string FIELD_SECOND_NAME = 'second_name';
+    public const string FIELD_BIRTH_DATE = 'birthdate';
+    public const string FIELD_BIOGRAPHY = 'biography';
+    public const string FIELD_CITY = 'city';
+    public const string FIELD_PASSWORD = 'password';
+
     public string $firstName;
     public string $secondName;
     public string $birthdate;
@@ -30,12 +37,12 @@ class RegisterDTO
     public static function createFromArray(array $data): self
     {
         return new self(
-            $data['firstName'],
-            $data['secondName'],
-            $data['birthdate'],
-            $data['biography'],
-            $data['city'],
-            $data['password']
+            $data[self::FIELD_FIRST_NAME],
+            $data[self::FIELD_SECOND_NAME],
+            $data[self::FIELD_BIRTH_DATE],
+            $data[self::FIELD_BIOGRAPHY],
+            $data[self::FIELD_CITY],
+            $data[self::FIELD_PASSWORD],
         );
     }
 }
