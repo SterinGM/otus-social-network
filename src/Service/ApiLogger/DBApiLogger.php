@@ -25,6 +25,7 @@ class DBApiLogger implements ApiLoggerInterface
     private function mapLog(ApiData $data): ApiLog
     {
         $log = new ApiLog();
+        $log->setId($data->id);
         $log->setUserId($data->userId);
         $log->setUri($data->uri);
         $log->setRequest($data->request);
