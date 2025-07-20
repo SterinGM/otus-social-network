@@ -40,9 +40,17 @@ class ApiSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function onRequest(): void
+    public function onRequest(RequestEvent $event): void
     {
         $this->stopwatch->start('api');
+
+        $request = $event->getRequest();
+
+        if (!$this->isApiRequest($request)) {
+            return;
+        }
+
+        $this->requestLogger->generateId($request);
     }
 
     public function onResponse(ResponseEvent $event): void

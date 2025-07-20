@@ -5,8 +5,10 @@ namespace App\Service\ApiLogger;
 use App\Entity\ApiLog;
 use App\Repository\ApiLogRepository;
 use DateTimeImmutable;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Uid\Uuid;
 
-class DBApiLogger implements ApiLoggerInterface
+class ApiLogger implements ApiLoggerInterface
 {
     private ApiLogRepository $apiLogRepository;
 
@@ -19,7 +21,14 @@ class DBApiLogger implements ApiLoggerInterface
     {
         $log = $this->mapLog($data);
 
-        $this->apiLogRepository->save($log, true);
+        $this->apiLogRepository->save($log);
+    }
+
+    public function generateId(Request $request): void
+    {
+        $id = Uuid::v7()->toRfc4122();
+
+        $request->attributes->set('api_request_id', $id);
     }
 
     private function mapLog(ApiData $data): ApiLog

@@ -7,7 +7,6 @@ use DateTimeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Stopwatch\StopwatchPeriod;
-use Symfony\Component\Uid\Uuid;
 
 readonly class ApiData
 {
@@ -53,8 +52,10 @@ readonly class ApiData
         $responseData = $response->getContent() !== false ? json_decode($response->getContent(), true) : null;
         $responseJson = $responseData ? json_encode($responseData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
 
+        $requestId = $request->attributes->get('api_request_id', '');
+
         return new self(
-            Uuid::v7()->toRfc4122(),
+            $requestId,
             $userId ?? '',
             $request->getPathInfo(),
             (string)$requestJson,
