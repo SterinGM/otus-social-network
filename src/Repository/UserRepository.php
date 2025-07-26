@@ -6,6 +6,7 @@ use App\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -97,16 +98,31 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->bindValue('id', $id);
         $result = $statement->executeQuery();
 
-        return $this->mapUser($result);
-    }
-
-    private function mapUser(Result $result): ?User
-    {
         if (!$result->rowCount()) {
             return null;
         }
 
-        $data = $result->fetchAssociative();
+        return $this->mapUser($result->fetchAssociative());
+    }
+
+    /**
+     * @return User[]
+     */
+    public function search(string $firstName, string $lastName, int $limit = 100): array
+    {
+        $sql = 'SELECT * FROM user WHERE first_name LIKE :firstName AND second_name LIKE :secondName ORDER BY id ASC LIMIT :limit';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('firstName', $firstName . '%');
+        $statement->bindValue('secondName', $lastName . '%');
+        $statement->bindValue('limit', $limit, ParameterType::INTEGER);
+        $result = $statement->executeQuery();
+
+        return $this->mapList($result->fetchAllAssociative());
+    }
+
+    private function mapUser(array $data): ?User
+    {
         $birthdate = DateTimeImmutable::createFromFormat(UserRepository::BIRTHDATE_FORMAT, $data['birthdate']);
 
         return new User()
@@ -117,5 +133,21 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setBiography($data['biography'])
             ->setCity($data['city'])
             ->setPassword($data['password']);
+    }
+
+    /**
+     * @return User[]
+     */
+    private function mapList(array $list): array
+    {
+        $result = [];
+
+        foreach ($list as $data) {
+            $user = $this->mapUser($data);
+
+            $result[$user->getId()] = $user;
+        }
+
+        return $result;
     }
 }

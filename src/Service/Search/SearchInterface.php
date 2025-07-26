@@ -1,0 +1,14 @@
+<?php
+
+namespace App\Service\Search;
+
+use App\DTO\User\Request\SearchRequest;
+use App\Entity\User;
+
+interface SearchInterface
+{
+    /**
+     * @return User[]
+     */
+    public function searchUsers(SearchRequest $searchRequest): array;
+}
