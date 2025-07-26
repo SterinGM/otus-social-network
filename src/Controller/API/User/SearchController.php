@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class SearchController
 {
     #[Route('/user/search', name: 'api_user_search', methods: ['GET'])]
-    public function __invoke(SearchRequest $registerRequest): JsonResponse
+    public function __invoke(SearchRequest $searchRequest): JsonResponse
     {
         return ApiJsonResponse::create(SearchResponse::createFromResult([]));
     }

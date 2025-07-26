@@ -26,7 +26,7 @@ class SearchResolver implements ValueResolverInterface
             return;
         }
 
-        $data = $request->getPayload()->all();
+        $data = $request->query->all();
         $errors = $this->validate($data);
 
         if (count($errors)) {
