@@ -28,7 +28,20 @@ class Registration
         return $user;
     }
 
-    private function getUserFromDTO(RegisterRequest $registerDTO): User
+    /**
+     * @param RegisterRequest[] $requests
+     */
+    public function registerUsers(array $requests): void {
+        $users = [];
+
+        foreach ($requests as $registerRequest) {
+            $users[] = $this->getUserFromDTO($registerRequest, false);
+        }
+
+        $this->userRepository->createUsers($users);
+    }
+
+    private function getUserFromDTO(RegisterRequest $registerDTO, $hashPassword = true): User
     {
         $birthdate = new DateTimeImmutable($registerDTO->birthdate);
         $user = new User()
@@ -39,7 +52,10 @@ class Registration
             ->setBiography($registerDTO->biography)
             ->setCity($registerDTO->city);
 
-        $password = $this->hasher->hashPassword($user, $registerDTO->password);
+        $password = $hashPassword
+            ? $this->hasher->hashPassword($user, $registerDTO->password)
+            : $registerDTO->password;
+
         $user->setPassword($password);
 
         return $user;

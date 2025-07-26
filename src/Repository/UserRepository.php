@@ -62,6 +62,33 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->executeQuery();
     }
 
+    /**
+     * @param User[] $users
+     */
+    public function createUsers(array $users): void
+    {
+        $sql = 'INSERT INTO user(id, password, roles, first_name, second_name, birthdate, biography, city) VALUES';
+
+        foreach ($users as $n => $user) {
+            $sql .= ($n ? ',' : '') . "(:id$n, :password$n, :roles$n, :firstName$n, :secondName$n, :birthdate$n, :biography$n, :city$n)";
+        }
+
+        $statement = $this->connection->prepare($sql);
+
+        foreach ($users as $n => $user) {
+            $statement->bindValue('id' . $n, $user->getId());
+            $statement->bindValue('password' . $n, $user->getPassword());
+            $statement->bindValue('roles' . $n, json_encode($user->getRoles()));
+            $statement->bindValue('firstName' . $n, $user->getFirstName());
+            $statement->bindValue('secondName' . $n, $user->getSecondName());
+            $statement->bindValue('birthdate' . $n, $user->getBirthdate()->format(self::BIRTHDATE_FORMAT));
+            $statement->bindValue('biography' . $n, $user->getBiography());
+            $statement->bindValue('city' . $n, $user->getCity());
+        }
+
+        $statement->executeQuery();
+    }
+
     public function getById(string $id): ?User
     {
         $sql = 'SELECT * FROM user WHERE id = :id';
