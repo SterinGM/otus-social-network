@@ -46,9 +46,10 @@ class UserFixtures extends Fixture
             $requests = [];
 
             for ($j = 0; $j < 100; $j++) {
+                $gender = $this->faker->randomElement(['male', 'female']);
                 $data = [
-                    RegisterRequest::FIELD_FIRST_NAME => $this->faker->firstName,
-                    RegisterRequest::FIELD_SECOND_NAME => $this->faker->lastName,
+                    RegisterRequest::FIELD_FIRST_NAME => $this->faker->firstName($gender),
+                    RegisterRequest::FIELD_SECOND_NAME => $this->faker->lastName($gender),
                     RegisterRequest::FIELD_BIRTH_DATE => $this->faker->date,
                     RegisterRequest::FIELD_BIOGRAPHY => $this->faker->realText,
                     RegisterRequest::FIELD_CITY => $this->faker->city,
