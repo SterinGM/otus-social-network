@@ -110,7 +110,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function search(string $firstName, string $lastName, int $limit = 100): array
     {
-        $sql = 'SELECT * FROM user WHERE first_name LIKE :firstName AND second_name LIKE :secondName ORDER BY id ASC LIMIT :limit';
+        $sql = 'SELECT * FROM user WHERE id IN 
+            (SELECT id FROM user WHERE first_name LIKE :firstName AND second_name LIKE :secondName)
+            ORDER BY id ASC LIMIT :limit';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('firstName', $firstName . '%');
