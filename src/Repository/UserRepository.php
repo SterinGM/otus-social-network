@@ -6,6 +6,7 @@ use App\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -62,6 +63,33 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->executeQuery();
     }
 
+    /**
+     * @param User[] $users
+     */
+    public function createUsers(array $users): void
+    {
+        $sql = 'INSERT INTO user(id, password, roles, first_name, second_name, birthdate, biography, city) VALUES';
+
+        foreach ($users as $n => $user) {
+            $sql .= ($n ? ',' : '') . "(:id$n, :password$n, :roles$n, :firstName$n, :secondName$n, :birthdate$n, :biography$n, :city$n)";
+        }
+
+        $statement = $this->connection->prepare($sql);
+
+        foreach ($users as $n => $user) {
+            $statement->bindValue('id' . $n, $user->getId());
+            $statement->bindValue('password' . $n, $user->getPassword());
+            $statement->bindValue('roles' . $n, json_encode($user->getRoles()));
+            $statement->bindValue('firstName' . $n, $user->getFirstName());
+            $statement->bindValue('secondName' . $n, $user->getSecondName());
+            $statement->bindValue('birthdate' . $n, $user->getBirthdate()->format(self::BIRTHDATE_FORMAT));
+            $statement->bindValue('biography' . $n, $user->getBiography());
+            $statement->bindValue('city' . $n, $user->getCity());
+        }
+
+        $statement->executeQuery();
+    }
+
     public function getById(string $id): ?User
     {
         $sql = 'SELECT * FROM user WHERE id = :id';
@@ -70,16 +98,31 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->bindValue('id', $id);
         $result = $statement->executeQuery();
 
-        return $this->mapUser($result);
-    }
-
-    private function mapUser(Result $result): ?User
-    {
         if (!$result->rowCount()) {
             return null;
         }
 
-        $data = $result->fetchAssociative();
+        return $this->mapUser($result->fetchAssociative());
+    }
+
+    /**
+     * @return User[]
+     */
+    public function search(string $firstName, string $lastName, int $limit = 100): array
+    {
+        $sql = 'SELECT * FROM user WHERE first_name LIKE :firstName AND second_name LIKE :secondName ORDER BY id ASC LIMIT :limit';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('firstName', $firstName . '%');
+        $statement->bindValue('secondName', $lastName . '%');
+        $statement->bindValue('limit', $limit, ParameterType::INTEGER);
+        $result = $statement->executeQuery();
+
+        return $this->mapList($result->fetchAllAssociative());
+    }
+
+    private function mapUser(array $data): ?User
+    {
         $birthdate = DateTimeImmutable::createFromFormat(UserRepository::BIRTHDATE_FORMAT, $data['birthdate']);
 
         return new User()
@@ -90,5 +133,21 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setBiography($data['biography'])
             ->setCity($data['city'])
             ->setPassword($data['password']);
+    }
+
+    /**
+     * @return User[]
+     */
+    private function mapList(array $list): array
+    {
+        $result = [];
+
+        foreach ($list as $data) {
+            $user = $this->mapUser($data);
+
+            $result[$user->getId()] = $user;
+        }
+
+        return $result;
     }
 }

@@ -64,7 +64,8 @@ class ExceptionListener
     private function getJsonResponse(Request $request, string $message, ErrorCode $errorCode, int $statusCode = Response::HTTP_BAD_REQUEST): Response
     {
         $errors = (array) $request->attributes->get('errors', []);
-        $data = Error::create($errorCode, $message, $errors);
+        $requestId = $request->attributes->get('api_request_id', '');
+        $data = Error::create($errorCode, $message, $errors, $requestId);
 
         return ApiJsonResponse::create($data, $statusCode);
     }
