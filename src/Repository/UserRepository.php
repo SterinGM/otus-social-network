@@ -6,6 +6,7 @@ use App\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -30,6 +31,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     /**
      * Used to upgrade (rehash) the user's password automatically over time.
+     * @throws Exception
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
@@ -45,6 +47,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->executeStatement();
     }
 
+    /**
+     * @throws Exception
+     */
     public function createUser(User $user): void
     {
         $sql = 'INSERT INTO user(id, password, roles, first_name, second_name, birthdate, biography, city)
@@ -64,6 +69,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     /**
      * @param User[] $users
+     * @throws Exception
      */
     public function createUsers(array $users): void
     {
@@ -89,6 +95,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->executeStatement();
     }
 
+    /**
+     * @throws Exception
+     */
     public function getById(string $id): ?User
     {
         $sql = 'SELECT * FROM user WHERE id = :id';
@@ -106,6 +115,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     /**
      * @return User[]
+     * @throws Exception
      */
     public function search(string $firstName, string $lastName, int $limit = 100): array
     {

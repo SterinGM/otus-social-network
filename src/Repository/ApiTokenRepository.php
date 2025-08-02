@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\ApiToken;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -28,6 +29,9 @@ class ApiTokenRepository extends ServiceEntityRepository
         $this->connection = $this->getEntityManager()->getConnection();
     }
 
+    /**
+     * @throws Exception
+     */
     public function create(ApiToken $token): void
     {
         $sql = 'INSERT INTO api_token(token, user_id, created_at)
@@ -40,6 +44,9 @@ class ApiTokenRepository extends ServiceEntityRepository
         $statement->executeStatement();
     }
 
+    /**
+     * @throws Exception
+     */
     public function clearUserTokens(string $userId): void
     {
         $sql = 'DELETE FROM api_token WHERE user_id = :user_id';

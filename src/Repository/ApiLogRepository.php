@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\ApiLog;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -29,6 +30,9 @@ class ApiLogRepository extends ServiceEntityRepository
         $this->connection = $this->getEntityManager()->getConnection();
     }
 
+    /**
+     * @throws Exception
+     */
     public function save(ApiLog $log): void
     {
         $sql = 'INSERT INTO api_log(id, user_id, uri, request, response, time, memory, created_at)
