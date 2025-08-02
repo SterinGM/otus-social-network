@@ -33,7 +33,7 @@ class UserFixtures extends Fixture
         $this->faker = Factory::create('ru_RU');
 
         $this->entityManager = $entityManager;
-        $this->entityManager->getConnection()->getConfiguration()->setSQLLogger();
+        $this->entityManager->getConnection()->getConfiguration()->setMiddlewares([]);
     }
 
     public function load(ObjectManager $manager): void

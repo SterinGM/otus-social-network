@@ -37,7 +37,7 @@ class ApiTokenRepository extends ServiceEntityRepository
         $statement->bindValue('token', $token->getToken());
         $statement->bindValue('user_id', $token->getUserId());
         $statement->bindValue('created_at', $token->getCreatedAt()->format(self::DATE_FORMAT));
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
     public function clearUserTokens(string $userId): void
@@ -46,6 +46,6 @@ class ApiTokenRepository extends ServiceEntityRepository
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('user_id', $userId);
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 }

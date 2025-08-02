@@ -48,7 +48,7 @@ class ExceptionListener
         }
 
         if ($exception instanceof HttpExceptionInterface) {
-            $message = (new TranslatableMessage(ErrorCode::INVALID_PARAMS->translateCode(), [], 'errors'))->trans($this->translator);
+            $message = new TranslatableMessage(ErrorCode::INVALID_PARAMS->translateCode(), [], 'errors')->trans($this->translator);
             $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_PARAMS);
             $event->setResponse($response);
 
@@ -56,7 +56,7 @@ class ExceptionListener
         }
 
         $this->logger->error($exception->getMessage(), $exception->getTrace());
-        $message = (new TranslatableMessage(ErrorCode::SERVER_ERROR->translateCode(), [], 'errors'))->trans($this->translator);
+        $message = new TranslatableMessage(ErrorCode::SERVER_ERROR->translateCode(), [], 'errors')->trans($this->translator);
         $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
         $event->setResponse($response);
     }

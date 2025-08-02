@@ -7,7 +7,6 @@ use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -43,7 +42,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('password', $newHashedPassword);
         $statement->bindValue('id', $user->getId());
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
     public function createUser(User $user): void
@@ -60,7 +59,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->bindValue('birthdate', $user->getBirthdate()->format(self::BIRTHDATE_FORMAT));
         $statement->bindValue('biography', $user->getBiography());
         $statement->bindValue('city', $user->getCity());
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
     /**
@@ -87,7 +86,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $statement->bindValue('city' . $n, $user->getCity());
         }
 
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
     public function getById(string $id): ?User

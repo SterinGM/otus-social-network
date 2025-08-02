@@ -43,6 +43,6 @@ class ApiLogRepository extends ServiceEntityRepository
         $statement->bindValue('time', $log->getTime(), ParameterType::INTEGER);
         $statement->bindValue('memory', $log->getMemory(), ParameterType::INTEGER);
         $statement->bindValue('created_at', $log->getCreatedAt()->format(self::DATE_FORMAT));
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 }
