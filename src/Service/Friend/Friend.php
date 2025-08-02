@@ -2,6 +2,7 @@
 
 namespace App\Service\Friend;
 
+use App\DTO\Friend\Request\DeleteRequest;
 use App\DTO\Friend\Request\SetRequest;
 use App\Repository\FriendRepository;
 use App\Repository\UserRepository;
@@ -29,6 +30,21 @@ class Friend implements FriendInterface
             return;
         }
 
-        $this->friendRepository->setFriends($setRequest->fromUserId, $setRequest->userId);
+        $this->friendRepository->setFriend($setRequest->fromUserId, $setRequest->userId);
+    }
+
+    public function deleteUserFriend(DeleteRequest $deleteRequest)
+    {
+        if ($deleteRequest->userId === $deleteRequest->fromUserId) {
+            return;
+        }
+
+        $user = $this->userRepository->getById($deleteRequest->userId);
+
+        if ($user === null) {
+            return;
+        }
+
+        $this->friendRepository->deleteFriend($deleteRequest->fromUserId, $deleteRequest->userId);
     }
 }
