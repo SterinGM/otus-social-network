@@ -48,6 +48,7 @@ class ExceptionListener
         }
 
         if ($exception instanceof HttpExceptionInterface) {
+            $this->logger->warning($exception->getMessage(), $exception->getTrace());
             $message = new TranslatableMessage(ErrorCode::INVALID_PARAMS->translateCode(), [], 'errors')->trans($this->translator);
             $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_PARAMS);
             $event->setResponse($response);
