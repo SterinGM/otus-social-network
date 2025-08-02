@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -42,6 +43,15 @@ class ExceptionListener
             $this->logger->warning($exception->getMessage(), $exception->getTrace());
             $message = $exception->getTranslationMessage()?->trans($this->translator) ?? $exception->getMessage();
             $response = $this->getJsonResponse($event->getRequest(), $message, $exception->getErrorCode(), Response::HTTP_NOT_FOUND);
+            $event->setResponse($response);
+
+            return;
+        }
+
+        if ($exception->getPrevious() instanceof InsufficientAuthenticationException) {
+            $this->logger->warning($exception->getMessage(), $exception->getTrace());
+            $message = new TranslatableMessage(ErrorCode::INVALID_CREDENTIALS->translateCode(), [], 'errors')->trans($this->translator);
+            $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_CREDENTIALS, Response::HTTP_UNAUTHORIZED);
             $event->setResponse($response);
 
             return;
