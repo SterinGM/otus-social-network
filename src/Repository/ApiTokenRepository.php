@@ -55,4 +55,29 @@ class ApiTokenRepository extends ServiceEntityRepository
         $statement->bindValue('user_id', $userId);
         $statement->executeStatement();
     }
+
+    /**
+     * @throws Exception
+     */
+    public function getByToken(string $token): ?ApiToken
+    {
+        $sql = 'SELECT * FROM api_token WHERE token = :token';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('token', $token);
+        $result = $statement->executeQuery();
+
+        if (!$result->rowCount()) {
+            return null;
+        }
+
+        return $this->mapApiToken($result->fetchAssociative());
+    }
+
+    private function mapApiToken(array $data): ?ApiToken
+    {
+        return new ApiToken()
+            ->setToken($data['token'])
+            ->setUserId($data['user_id']);
+    }
 }

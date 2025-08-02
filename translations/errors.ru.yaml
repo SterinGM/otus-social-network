@@ -9,5 +9,5 @@ token_not_found: Токен не найден.
 user_not_found: Пользователь %id% не найден.
 
 # Authentication
-invalid_credentials: Неверный логин или пароль.
+invalid_credentials: Токен авторизации не валидный.
 authentication_required: Необходимо авторизоваться.
