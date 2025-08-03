@@ -51,7 +51,7 @@ class Login
     private function getTokenFromRequest(LoginRequest $loginRequest): ApiToken
     {
         return new ApiToken()
-            ->setToken(Uuid::v7()->toRfc4122())
+            ->setToken(Uuid::v4()->toRfc4122())
             ->setUserId($loginRequest->userId);
     }
 }
