@@ -5,12 +5,11 @@ namespace App\Controller\API\Friend;
 use App\DTO\Friend\Request\DeleteRequest;
 use App\Service\ApiJsonResponse;
 use App\Service\Friend\FriendInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class DeleteController extends AbstractController
+class DeleteController
 {
     private FriendInterface $friend;
 
