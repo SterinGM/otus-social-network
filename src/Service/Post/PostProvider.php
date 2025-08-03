@@ -3,6 +3,7 @@
 namespace App\Service\Post;
 
 use App\DTO\Post\Request\CreateRequest;
+use App\DTO\Post\Request\DeleteRequest;
 use App\DTO\Post\Request\UpdateRequest;
 use App\Entity\Post;
 use App\Entity\User;
@@ -29,21 +30,20 @@ class PostProvider implements PostProviderInterface
 
     public function update(UpdateRequest $updateRequest): Post
     {
-        $post = $this->postRepository->getById($updateRequest->id);
-
-        if ($post === null) {
-            throw new PostNotFoundException($updateRequest->id);
-        }
-
-        if ($post->getAuthor()->getId() !== $updateRequest->authorId) {
-            throw new PostNotFoundException($updateRequest->id);
-        }
+        $post = $this->getPost($updateRequest->id, $updateRequest->authorId);
 
         $post->setText($updateRequest->text);
 
         $this->postRepository->update($post);
 
         return $post;
+    }
+
+    public function delete(DeleteRequest $deleteRequest): void
+    {
+        $post = $this->getPost($deleteRequest->id, $deleteRequest->authorId);
+
+        $this->postRepository->delete($post);
     }
 
     private function getPostFromRequest(CreateRequest $createRequest): Post
@@ -55,5 +55,20 @@ class PostProvider implements PostProviderInterface
             ->setId(Uuid::v7()->toRfc4122())
             ->setAuthor($author)
             ->setText($createRequest->text);
+    }
+
+    protected function getPost(string $id, string $authorId): Post
+    {
+        $post = $this->postRepository->getById($id);
+
+        if ($post === null) {
+            throw new PostNotFoundException($id);
+        }
+
+        if ($post->getAuthor()->getId() !== $authorId) {
+            throw new PostNotFoundException($id);
+        }
+
+        return $post;
     }
 }

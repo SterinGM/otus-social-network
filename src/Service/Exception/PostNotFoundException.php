@@ -23,6 +23,6 @@ class PostNotFoundException extends RuntimeException implements ExceptionInterfa
 
 	public function getErrorCode(): ErrorCode
 	{
-		return ErrorCode::USER_NOT_FOUND;
+		return ErrorCode::POST_NOT_FOUND;
 	}
 }

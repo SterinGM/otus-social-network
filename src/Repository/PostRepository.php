@@ -69,6 +69,15 @@ class PostRepository extends ServiceEntityRepository
         $statement->executeStatement();
     }
 
+    public function delete(Post $post)
+    {
+        $sql = 'DELETE FROM post WHERE id = :id';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('id', $post->getId());
+        $statement->executeStatement();
+    }
+
     private function mapPost(array $data): Post
     {
         $user = new User()
