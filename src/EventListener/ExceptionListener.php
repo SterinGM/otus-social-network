@@ -60,7 +60,7 @@ class ExceptionListener
         if ($exception instanceof HttpExceptionInterface) {
             $this->logger->warning($exception->getMessage(), $exception->getTrace());
             $message = new TranslatableMessage(ErrorCode::INVALID_PARAMS->translateCode(), [], 'errors')->trans($this->translator);
-            $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_PARAMS);
+            $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_PARAMS, Response::HTTP_BAD_REQUEST);
             $event->setResponse($response);
 
             return;
@@ -72,7 +72,7 @@ class ExceptionListener
         $event->setResponse($response);
     }
 
-    private function getJsonResponse(Request $request, string $message, ErrorCode $errorCode, int $statusCode = Response::HTTP_BAD_REQUEST): Response
+    private function getJsonResponse(Request $request, string $message, ErrorCode $errorCode, int $statusCode): Response
     {
         $errors = (array) $request->attributes->get('errors', []);
         $requestId = $request->attributes->get('api_request_id', '');
