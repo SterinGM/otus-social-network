@@ -74,7 +74,7 @@ class ApiTokenRepository extends ServiceEntityRepository
         return $this->mapApiToken($result->fetchAssociative());
     }
 
-    private function mapApiToken(array $data): ?ApiToken
+    private function mapApiToken(array $data): ApiToken
     {
         return new ApiToken()
             ->setToken($data['token'])

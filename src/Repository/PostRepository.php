@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Post;
+use App\Entity\User;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -37,5 +39,45 @@ class PostRepository extends ServiceEntityRepository
         $statement->bindValue('text', $post->getText());
         $statement->bindValue('created_at', $post->getCreatedAt()->format(self::DATE_FORMAT));
         $statement->executeStatement();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getById(string $id): ?Post
+    {
+        $sql = 'SELECT * FROM post WHERE id = :id';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('id', $id);
+        $result = $statement->executeQuery();
+
+        if (!$result->rowCount()) {
+            return null;
+        }
+
+        return $this->mapPost($result->fetchAssociative());
+    }
+
+    public function update(Post $post): void
+    {
+        $sql = 'UPDATE post SET text = :text WHERE id = :id';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('id', $post->getId());
+        $statement->bindValue('text', $post->getText());
+        $statement->executeStatement();
+    }
+
+    private function mapPost(array $data): Post
+    {
+        $user = new User()
+            ->setId($data['author_id']);
+
+        return new Post()
+            ->setId($data['id'])
+            ->setText($data['text'])
+            ->setAuthor($user)
+            ->setCreatedAt(new DateTimeImmutable($data['created_at']));
     }
 }

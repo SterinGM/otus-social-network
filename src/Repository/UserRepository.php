@@ -132,7 +132,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->mapList($result->fetchAllAssociative());
     }
 
-    private function mapUser(array $data): ?User
+    private function mapUser(array $data): User
     {
         $birthdate = DateTimeImmutable::createFromFormat(UserRepository::BIRTHDATE_FORMAT, $data['birthdate']);
 

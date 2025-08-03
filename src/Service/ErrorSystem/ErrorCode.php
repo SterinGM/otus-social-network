@@ -18,6 +18,9 @@ enum ErrorCode: int implements Translatable
     case INVALID_CREDENTIALS = 3000;
     case AUTHENTICATION_REQUIRED = 3001;
 
+    // Post
+    case POST_NOT_FOUND = 4000;
+
     public function translateCode(): string
     {
         return match($this) {
@@ -27,6 +30,7 @@ enum ErrorCode: int implements Translatable
             self::INVALID_CREDENTIALS => 'invalid_credentials',
             self::AUTHENTICATION_REQUIRED => 'authentication_required',
             self::TOKEN_NOT_FOUND => 'token_not_found',
+            self::POST_NOT_FOUND => 'post_not_found',
         };
     }
 }
