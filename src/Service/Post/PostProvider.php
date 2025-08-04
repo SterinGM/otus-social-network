@@ -4,6 +4,7 @@ namespace App\Service\Post;
 
 use App\DTO\Post\Request\CreateRequest;
 use App\DTO\Post\Request\DeleteRequest;
+use App\DTO\Post\Request\GetRequest;
 use App\DTO\Post\Request\UpdateRequest;
 use App\Entity\Post;
 use App\Entity\User;
@@ -57,7 +58,12 @@ class PostProvider implements PostProviderInterface
             ->setText($createRequest->text);
     }
 
-    protected function getPost(string $id, string $authorId): Post
+    public function get(GetRequest $getRequest): Post
+    {
+        return $this->getPost($getRequest->id);
+    }
+
+    protected function getPost(string $id, ?string $authorId = null): Post
     {
         $post = $this->postRepository->getById($id);
 
@@ -65,7 +71,7 @@ class PostProvider implements PostProviderInterface
             throw new PostNotFoundException($id);
         }
 
-        if ($post->getAuthor()->getId() !== $authorId) {
+        if ($authorId && $post->getAuthor()->getId() !== $authorId) {
             throw new PostNotFoundException($id);
         }
 
