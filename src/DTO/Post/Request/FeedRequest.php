@@ -11,7 +11,7 @@ class FeedRequest
     public int $limit;
     public string $userId;
 
-    public function __construct(int $offset, int $limit)
+    private function __construct(int $offset, int $limit)
     {
         $this->offset = $offset;
         $this->limit = $limit;
@@ -20,8 +20,8 @@ class FeedRequest
     public static function createFromArray(array $data): self
     {
         return new self(
-            $data[self::FIELD_OFFSET],
-            $data[self::FIELD_LIMIT],
+            $data[self::FIELD_OFFSET] ?? 0,
+            $data[self::FIELD_LIMIT] ?? 0,
         );
     }
 }
