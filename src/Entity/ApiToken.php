@@ -7,7 +7,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ApiTokenRepository::class)]
-#[ORM\Index(columns: ["user_id"], name: "user_idx")]
+#[ORM\Index(name: "user_idx", columns: ["user_id"])]
 class ApiToken
 {
     #[ORM\Id]

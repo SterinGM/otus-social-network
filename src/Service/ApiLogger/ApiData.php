@@ -53,11 +53,12 @@ readonly class ApiData
         $responseJson = $responseData ? json_encode($responseData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
 
         $requestId = $request->attributes->get('api_request_id', '');
+        $requestUri = $request->getPathInfo() . ($request->getQueryString() ? '?' . urldecode($request->getQueryString()) : '');
 
         return new self(
             $requestId,
             $userId ?? '',
-            $request->getPathInfo(),
+            $requestUri,
             (string)$requestJson,
             (string)$responseJson,
             (int)$stopwatchPeriod->getEndTime(),

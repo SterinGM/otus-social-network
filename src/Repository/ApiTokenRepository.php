@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\ApiToken;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -28,6 +29,9 @@ class ApiTokenRepository extends ServiceEntityRepository
         $this->connection = $this->getEntityManager()->getConnection();
     }
 
+    /**
+     * @throws Exception
+     */
     public function create(ApiToken $token): void
     {
         $sql = 'INSERT INTO api_token(token, user_id, created_at)
@@ -37,15 +41,43 @@ class ApiTokenRepository extends ServiceEntityRepository
         $statement->bindValue('token', $token->getToken());
         $statement->bindValue('user_id', $token->getUserId());
         $statement->bindValue('created_at', $token->getCreatedAt()->format(self::DATE_FORMAT));
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
+    /**
+     * @throws Exception
+     */
     public function clearUserTokens(string $userId): void
     {
         $sql = 'DELETE FROM api_token WHERE user_id = :user_id';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('user_id', $userId);
-        $statement->executeQuery();
+        $statement->executeStatement();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getByToken(string $token): ?ApiToken
+    {
+        $sql = 'SELECT * FROM api_token WHERE token = :token';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('token', $token);
+        $result = $statement->executeQuery();
+
+        if (!$result->rowCount()) {
+            return null;
+        }
+
+        return $this->mapApiToken($result->fetchAssociative());
+    }
+
+    private function mapApiToken(array $data): ApiToken
+    {
+        return new ApiToken()
+            ->setToken($data['token'])
+            ->setUserId($data['user_id']);
     }
 }

@@ -11,6 +11,9 @@ RUN docker-php-ext-install opcache
 RUN docker-php-ext-install pdo
 RUN docker-php-ext-install pdo_mysql
 
+RUN pecl install -o -f redis
+RUN docker-php-ext-enable redis
+
 RUN pecl install xdebug-3.4.2
 RUN docker-php-ext-enable xdebug
 

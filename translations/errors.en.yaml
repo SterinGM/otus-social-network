@@ -11,3 +11,6 @@ user_not_found: User %id% not found.
 # Authentication
 invalid_credentials: Invalid Credentials.
 authentication_required: Authentication Required.
+
+# Post
+post_not_found: Post %id% not found.

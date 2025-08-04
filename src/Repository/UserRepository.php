@@ -6,8 +6,8 @@ use App\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
-use Doctrine\DBAL\Result;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -31,6 +31,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     /**
      * Used to upgrade (rehash) the user's password automatically over time.
+     * @throws Exception
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
@@ -43,9 +44,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('password', $newHashedPassword);
         $statement->bindValue('id', $user->getId());
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
+    /**
+     * @throws Exception
+     */
     public function createUser(User $user): void
     {
         $sql = 'INSERT INTO user(id, password, roles, first_name, second_name, birthdate, biography, city)
@@ -60,11 +64,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $statement->bindValue('birthdate', $user->getBirthdate()->format(self::BIRTHDATE_FORMAT));
         $statement->bindValue('biography', $user->getBiography());
         $statement->bindValue('city', $user->getCity());
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
     /**
      * @param User[] $users
+     * @throws Exception
      */
     public function createUsers(array $users): void
     {
@@ -87,9 +92,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $statement->bindValue('city' . $n, $user->getCity());
         }
 
-        $statement->executeQuery();
+        $statement->executeStatement();
     }
 
+    /**
+     * @throws Exception
+     */
     public function getById(string $id): ?User
     {
         $sql = 'SELECT * FROM user WHERE id = :id';
@@ -106,7 +114,23 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
+     * @return string[]
+     * @throws Exception
+     */
+    public function getIdList(int $limit = 100): array
+    {
+        $sql = 'SELECT id FROM user ORDER BY id ASC LIMIT :limit';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('limit', $limit, ParameterType::INTEGER);
+        $result = $statement->executeQuery();
+
+        return $result->fetchFirstColumn();
+    }
+
+    /**
      * @return User[]
+     * @throws Exception
      */
     public function search(string $firstName, string $lastName, int $limit = 100): array
     {
@@ -123,7 +147,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->mapList($result->fetchAllAssociative());
     }
 
-    private function mapUser(array $data): ?User
+    private function mapUser(array $data): User
     {
         $birthdate = DateTimeImmutable::createFromFormat(UserRepository::BIRTHDATE_FORMAT, $data['birthdate']);
 

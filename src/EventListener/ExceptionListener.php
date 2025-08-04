@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\Translation\TranslatableMessage;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -47,21 +48,31 @@ class ExceptionListener
             return;
         }
 
+        if ($exception->getPrevious() instanceof InsufficientAuthenticationException) {
+            $this->logger->warning($exception->getMessage(), $exception->getTrace());
+            $message = new TranslatableMessage(ErrorCode::INVALID_CREDENTIALS->translateCode(), [], 'errors')->trans($this->translator);
+            $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_CREDENTIALS, Response::HTTP_UNAUTHORIZED);
+            $event->setResponse($response);
+
+            return;
+        }
+
         if ($exception instanceof HttpExceptionInterface) {
-            $message = (new TranslatableMessage(ErrorCode::INVALID_PARAMS->translateCode(), [], 'errors'))->trans($this->translator);
-            $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_PARAMS);
+            $this->logger->warning($exception->getMessage(), $exception->getTrace());
+            $message = new TranslatableMessage(ErrorCode::INVALID_PARAMS->translateCode(), [], 'errors')->trans($this->translator);
+            $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::INVALID_PARAMS, Response::HTTP_BAD_REQUEST);
             $event->setResponse($response);
 
             return;
         }
 
         $this->logger->error($exception->getMessage(), $exception->getTrace());
-        $message = (new TranslatableMessage(ErrorCode::SERVER_ERROR->translateCode(), [], 'errors'))->trans($this->translator);
+        $message = new TranslatableMessage(ErrorCode::SERVER_ERROR->translateCode(), [], 'errors')->trans($this->translator);
         $response = $this->getJsonResponse($event->getRequest(), $message, ErrorCode::SERVER_ERROR, Response::HTTP_INTERNAL_SERVER_ERROR);
         $event->setResponse($response);
     }
 
-    private function getJsonResponse(Request $request, string $message, ErrorCode $errorCode, int $statusCode = Response::HTTP_BAD_REQUEST): Response
+    private function getJsonResponse(Request $request, string $message, ErrorCode $errorCode, int $statusCode): Response
     {
         $errors = (array) $request->attributes->get('errors', []);
         $requestId = $request->attributes->get('api_request_id', '');

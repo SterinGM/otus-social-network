@@ -14,6 +14,8 @@ ini_set('memory_limit', -1);
 
 class UserFixtures extends Fixture
 {
+    public const string USER_REFERENCE = 'user';
+
     private const array TEST_USER = [
         RegisterRequest::FIELD_FIRST_NAME => 'Григорий',
         RegisterRequest::FIELD_SECOND_NAME => 'Стерин',
@@ -33,14 +35,16 @@ class UserFixtures extends Fixture
         $this->faker = Factory::create('ru_RU');
 
         $this->entityManager = $entityManager;
-        $this->entityManager->getConnection()->getConfiguration()->setSQLLogger();
+        $this->entityManager->getConnection()->getConfiguration()->setMiddlewares([]);
     }
 
     public function load(ObjectManager $manager): void
     {
         $registerRequest = RegisterRequest::createFromArray(self::TEST_USER);
 
-        $this->registration->registerUser($registerRequest);
+        $user = $this->registration->registerUser($registerRequest);
+
+        $this->addReference(self::USER_REFERENCE, $user);
 
         for ($i = 0; $i < 10_000; $i++) {
             $requests = [];

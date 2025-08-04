@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -43,6 +45,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 100)]
     private string $city;
+
+    /**
+     * @var Collection<int, self>
+     */
+    #[ORM\ManyToMany(targetEntity: self::class)]
+    private Collection $friends;
+
+    public function __construct()
+    {
+        $this->friends = new ArrayCollection();
+    }
 
     public function getId(): string
     {
@@ -166,6 +179,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCity(string $city): static
     {
         $this->city = $city;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getFriends(): Collection
+    {
+        return $this->friends;
+    }
+
+    public function addFriend(self $friend): static
+    {
+        if (!$this->friends->contains($friend)) {
+            $this->friends->add($friend);
+        }
+
+        return $this;
+    }
+
+    public function removeFriend(self $friend): static
+    {
+        $this->friends->removeElement($friend);
 
         return $this;
     }

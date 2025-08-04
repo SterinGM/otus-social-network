@@ -14,8 +14,13 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
+            stateless: true
             lazy: true
             provider: app_user_provider
+
+            access_token:
+                token_handler: App\Service\Security\ApiTokenHandler
+                failure_handler: App\Service\Security\AuthenticationFailureHandler
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -27,7 +32,8 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+         - { path: ^/friend, roles: ROLE_USER }
+         - { path: ^/post, roles: ROLE_USER }
 
 when@test:
     security:
