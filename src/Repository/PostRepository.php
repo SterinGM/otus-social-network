@@ -2,12 +2,14 @@
 
 namespace App\Repository;
 
+use App\DTO\Post\Request\FeedRequest;
 use App\Entity\Post;
 use App\Entity\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -78,6 +80,21 @@ class PostRepository extends ServiceEntityRepository
         $statement->executeStatement();
     }
 
+    public function getLastFriendsPosts(FeedRequest $feedRequest)
+    {
+        $sql = 'SELECT * FROM post WHERE author_id IN 
+             (SELECT user_target FROM user_user WHERE user_source = :userId)
+             ORDER BY id DESC LIMIT :limit OFFSET :offset';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('userId', $feedRequest->userId);
+        $statement->bindValue('limit', $feedRequest->limit, ParameterType::INTEGER);
+        $statement->bindValue('offset', $feedRequest->offset, ParameterType::INTEGER);
+        $result = $statement->executeQuery();
+
+        return $this->mapList($result->fetchAllAssociative());
+    }
+
     private function mapPost(array $data): Post
     {
         $user = new User()
@@ -88,5 +105,21 @@ class PostRepository extends ServiceEntityRepository
             ->setText($data['text'])
             ->setAuthor($user)
             ->setCreatedAt(new DateTimeImmutable($data['created_at']));
+    }
+
+    /**
+     * @return Post[]
+     */
+    private function mapList(array $list): array
+    {
+        $result = [];
+
+        foreach ($list as $data) {
+            $post = $this->mapPost($data);
+
+            $result[$post->getId()] = $post;
+        }
+
+        return $result;
     }
 }
