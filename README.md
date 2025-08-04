@@ -25,6 +25,7 @@ docker-compose exec php composer install
 docker-compose exec php bin/console doctrine:database:create --if-not-exists
 ```
 Для применения миграций выполните команду
+Процесс генерации занимает значительное время
 
 ```bash
 docker-compose exec php bin/console doctrine:migration:migrate -n

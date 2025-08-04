@@ -114,6 +114,21 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
+     * @return string[]
+     * @throws Exception
+     */
+    public function getIdList(int $limit = 100): array
+    {
+        $sql = 'SELECT id FROM user ORDER BY id ASC LIMIT :limit';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('limit', $limit, ParameterType::INTEGER);
+        $result = $statement->executeQuery();
+
+        return $result->fetchFirstColumn();
+    }
+
+    /**
      * @return User[]
      * @throws Exception
      */
