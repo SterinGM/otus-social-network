@@ -36,3 +36,12 @@ services:
             - 127.0.0.1:3309:3306
         volumes:
             - ./var/lib/mysql-data:/var/lib/mysql
+
+    redis:
+        container_name: socnet-redis
+        image: redis:7.4.3-alpine
+        restart: unless-stopped
+        ports:
+            - 127.0.0.1:6679:6379
+        volumes:
+            - .:/var/www/app

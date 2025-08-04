@@ -11,3 +11,6 @@ user_not_found: Пользователь %id% не найден.
 # Authentication
 invalid_credentials: Токен авторизации не валидный.
 authentication_required: Необходимо авторизоваться.
+
+# Post
+post_not_found: Пост %id% не найден.
