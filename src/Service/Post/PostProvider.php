@@ -8,16 +8,23 @@ use App\DTO\Post\Request\GetRequest;
 use App\DTO\Post\Request\UpdateRequest;
 use App\Entity\Post;
 use App\Entity\User;
+use App\Event\Post\PostCreatedEvent;
+use App\Event\Post\PostDeletedEvent;
+use App\Event\Post\PostUpdatedEvent;
 use App\Repository\PostRepository;
 use App\Service\Exception\PostNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Uid\Uuid;
 
 class PostProvider implements PostProviderInterface
 {
     private PostRepository $postRepository;
+    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(PostRepository $postRepository) {
+    public function __construct(PostRepository $postRepository, EventDispatcherInterface $eventDispatcher)
+    {
         $this->postRepository = $postRepository;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function create(CreateRequest $createRequest): Post
@@ -25,6 +32,9 @@ class PostProvider implements PostProviderInterface
         $post = $this->getPostFromRequest($createRequest);
 
         $this->postRepository->create($post);
+
+        $event = new PostCreatedEvent($post);
+        $this->eventDispatcher->dispatch($event);
 
         return $post;
     }
@@ -37,6 +47,9 @@ class PostProvider implements PostProviderInterface
 
         $this->postRepository->update($post);
 
+        $event = new PostUpdatedEvent($post);
+        $this->eventDispatcher->dispatch($event);
+
         return $post;
     }
 
@@ -45,6 +58,9 @@ class PostProvider implements PostProviderInterface
         $post = $this->getPost($deleteRequest->id, $deleteRequest->authorId);
 
         $this->postRepository->delete($post);
+
+        $event = new PostDeletedEvent($post);
+        $this->eventDispatcher->dispatch($event);
     }
 
     private function getPostFromRequest(CreateRequest $createRequest): Post

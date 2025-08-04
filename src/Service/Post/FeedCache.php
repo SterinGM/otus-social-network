@@ -43,9 +43,19 @@ class FeedCache implements FeedInterface
         });
     }
 
-    public function dropCacheByUser(string $userId): void
+    /**
+     * @param string[] $userIds
+     */
+    public function dropCacheByUsers(array $userIds): void
     {
-        $tag = $this->getCacheFeedTag($userId);
+        $tags = $this->getCacheFeedTags($userIds);
+
+        $this->cache->invalidateTags($tags);
+    }
+
+    public function dropCacheByPost(string $postId): void
+    {
+        $tag = $this->getCachePostTag($postId);
 
         $this->cache->invalidateTags([$tag]);
     }
@@ -53,6 +63,21 @@ class FeedCache implements FeedInterface
     private function getCacheKey(FeedRequest $feedRequest): string
     {
         return self::CACHE_PREFIX . $feedRequest->userId . '_' . $feedRequest->limit . '_' . $feedRequest->offset;
+    }
+
+    /**
+     * @param string[] $userIds
+     * @return string[]
+     */
+    private function getCacheFeedTags(array $userIds): array
+    {
+        $tags = [];
+
+        foreach ($userIds as $userId) {
+            $tags[] = $this->getCacheFeedTag($userId);
+        }
+
+        return $tags;
     }
 
     private function getCacheFeedTag(string $userId): string
@@ -69,9 +94,14 @@ class FeedCache implements FeedInterface
         $tags = [];
 
         foreach ($posts as $post) {
-            $tags[] = self::CACHE_TAG_POST . $post->getId();
+            $tags[] = $this->getCachePostTag($post->getId());
         }
 
         return $tags;
+    }
+
+    private function getCachePostTag(string $postId): string
+    {
+        return self::CACHE_TAG_POST . $postId;
     }
 }
