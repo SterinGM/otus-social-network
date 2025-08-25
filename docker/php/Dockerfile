@@ -5,6 +5,7 @@ RUN apt-get update
 RUN apt-get install -y libicu-dev
 RUN apt-get install -y git
 RUN apt-get install -y zip
+RUN apt-get install -y librabbitmq-dev
 
 RUN docker-php-ext-install intl
 RUN docker-php-ext-install opcache
@@ -13,6 +14,9 @@ RUN docker-php-ext-install pdo_mysql
 
 RUN pecl install -o -f redis
 RUN docker-php-ext-enable redis
+
+RUN pecl install amqp
+RUN docker-php-ext-enable amqp
 
 RUN pecl install xdebug-3.4.2
 RUN docker-php-ext-enable xdebug

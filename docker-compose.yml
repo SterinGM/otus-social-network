@@ -45,3 +45,16 @@ services:
             - 127.0.0.1:6679:6379
         volumes:
             - .:/var/www/app
+
+    rabbitmq:
+        container_name: socnet-rabbitmq
+        image: rabbitmq:3.9.15-management
+        restart: always
+        ports:
+            - 127.0.0.1:5772:5672
+            - 127.0.0.1:15772:15672
+        env_file:
+            - ./.env
+            - ./.env.local
+        volumes:
+            - ./var/lib/rabbitmq_data:/var/lib/rabbitmq
