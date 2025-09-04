@@ -20,11 +20,22 @@ class PostProvider implements PostProviderInterface
 {
     private PostRepository $postRepository;
     private EventDispatcherInterface $eventDispatcher;
+    private PostEventPublisher $postEventPublisher;
 
-    public function __construct(PostRepository $postRepository, EventDispatcherInterface $eventDispatcher)
+    /**
+     * @param PostRepository $postRepository
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param PostEventPublisher $postEventPublisher
+     */
+    public function __construct(
+        PostRepository $postRepository,
+        EventDispatcherInterface $eventDispatcher,
+        PostEventPublisher $postEventPublisher,
+    )
     {
         $this->postRepository = $postRepository;
         $this->eventDispatcher = $eventDispatcher;
+        $this->postEventPublisher = $postEventPublisher;
     }
 
     public function create(CreateRequest $createRequest): Post
@@ -35,6 +46,8 @@ class PostProvider implements PostProviderInterface
 
         $event = new PostCreatedEvent($post);
         $this->eventDispatcher->dispatch($event);
+
+        $this->postEventPublisher->publishPostCreated($post);
 
         return $post;
     }

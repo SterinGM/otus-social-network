@@ -1,0 +1,30 @@
+framework:
+  messenger:
+    transports:
+      amqp_post_events:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          exchange:
+            name: 'posts_exchange'
+            type: 'topic'
+            default_publish_routing_key: 'post.created'
+          queues:
+            user_posts_queue:
+              binding_keys: ['post.created.*']
+        retry_strategy:
+          max_retries: 3
+          delay: 1000
+          multiplier: 2
+          max_delay: 10000
+
+    routing:
+      'App\Message\Post\PostCreatedMessage': amqp_post_events
+
+
+# when@test:
+#    framework:
+#        messenger:
+#            transports:
+#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
+#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
+#                async: 'in-memory://'

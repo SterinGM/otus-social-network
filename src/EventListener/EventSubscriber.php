@@ -7,19 +7,19 @@ use App\Event\Friend\FriendDeletedEvent;
 use App\Event\Post\PostCreatedEvent;
 use App\Event\Post\PostDeletedEvent;
 use App\Event\Post\PostUpdatedEvent;
-use App\Repository\FriendRepository;
+use App\Service\Friend\FriendInterface;
 use App\Service\Post\FeedCache;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class EventSubscriber implements EventSubscriberInterface
 {
     private FeedCache $feedCache;
-    private FriendRepository $friendRepository;
+    private FriendInterface $friendService;
 
-    public function __construct(FeedCache $feedCache, FriendRepository $friendRepository)
+    public function __construct(FeedCache $feedCache, FriendInterface $friendService)
     {
         $this->feedCache = $feedCache;
-        $this->friendRepository = $friendRepository;
+        $this->friendService = $friendService;
     }
 
     public static function getSubscribedEvents()
@@ -45,7 +45,7 @@ class EventSubscriber implements EventSubscriberInterface
 
     public function onPostCreated(PostCreatedEvent $event): void
     {
-        $user_ids = $this->friendRepository->getUserSourcesByTarget($event->post->getAuthor()->getId());
+        $user_ids = $this->friendService->getUserSubscribersIds($event->post->getAuthor());
 
         $this->feedCache->dropCacheByUsers($user_ids);
     }
@@ -57,7 +57,7 @@ class EventSubscriber implements EventSubscriberInterface
 
     public function onPostDeleted(PostDeletedEvent $event): void
     {
-        $user_ids = $this->friendRepository->getUserSourcesByTarget($event->post->getAuthor()->getId());
+        $user_ids = $this->friendService->getUserSubscribersIds($event->post->getAuthor());
 
         $this->feedCache->dropCacheByUsers($user_ids);
     }
