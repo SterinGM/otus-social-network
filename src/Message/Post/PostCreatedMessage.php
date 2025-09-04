@@ -7,6 +7,7 @@ use DateTimeImmutable;
 class PostCreatedMessage
 {
     public readonly string $postId;
+    public readonly string $postText;
     public readonly string $authorId;
     /** @var string[] */
     public readonly array $friendIds;
@@ -15,9 +16,10 @@ class PostCreatedMessage
     /**
      * @param string[] $friendIds
      */
-    public function __construct(string $postId, string $authorId, array $friendIds, DateTimeImmutable $createdAt)
+    public function __construct(string $postId, string $postText, string $authorId, array $friendIds, DateTimeImmutable $createdAt)
     {
         $this->postId = $postId;
+        $this->postText = $postText;
         $this->authorId = $authorId;
         $this->friendIds = $friendIds;
         $this->createdAt = $createdAt;
@@ -25,6 +27,6 @@ class PostCreatedMessage
 
     public function getRoutingKey(): string
     {
-        return sprintf('post.created.%d', $this->authorId);
+        return sprintf('post.created.%s', $this->authorId);
     }
 }

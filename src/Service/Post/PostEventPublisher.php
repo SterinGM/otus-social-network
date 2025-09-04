@@ -26,6 +26,7 @@ class PostEventPublisher
 
         $message = new PostCreatedMessage(
             $post->getId(),
+            $post->getText(),
             $author->getId(),
             $friendIds,
             $post->getCreatedAt()
