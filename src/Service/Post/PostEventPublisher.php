@@ -24,6 +24,10 @@ class PostEventPublisher
         $author = $post->getAuthor();
         $friendIds = $this->friendService->getUserSubscribersIds($author);
 
+        if (count($friendIds) == 0) {
+            return;
+        }
+
         $message = new PostCreatedMessage(
             $post->getId(),
             $post->getText(),
