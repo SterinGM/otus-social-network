@@ -4,6 +4,7 @@ namespace App\Service\Friend;
 
 use App\DTO\Friend\Request\DeleteRequest;
 use App\DTO\Friend\Request\SetRequest;
+use App\Entity\User;
 use App\Event\Friend\FriendCreatedEvent;
 use App\Event\Friend\FriendDeletedEvent;
 use App\Repository\FriendRepository;
@@ -58,6 +59,11 @@ class Friend implements FriendInterface
         $this->friendRepository->deleteFriend($deleteRequest->fromUserId, $deleteRequest->userId);
 
         $this->friendDeleted($deleteRequest);
+    }
+
+    public function getUserSubscribersIds(User $user): array
+    {
+        return $this->friendRepository->getUserSourcesByTarget($user->getId());
     }
 
     private function friendCreated(SetRequest $setRequest): void
