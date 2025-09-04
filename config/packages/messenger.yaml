@@ -1,14 +1,21 @@
 framework:
   messenger:
     transports:
-      default:
-        amqp:
-          dsn: 'amqp://guest@localhost/%2F'
-          consumer_concurrency: 4
+      posts_transport:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          exchange:
+            name: 'posts_exchange'
+            type: 'topic'
+            default_publish_routing_key: 'post.created'
+          queues:
+            user_posts_queue:
+              name: 'user_posts_queue'
+              binding_keys: ['post.created.*']
 
-  routing:
-      # Route your messages to the transports
-      # 'App\Message\YourMessage': async
+#    routing:
+#      'App\Message\Post\PostCreatedMessage': posts_transport
+
 
 # when@test:
 #    framework:
