@@ -22,7 +22,7 @@ class EventSubscriber implements EventSubscriberInterface
         $this->friendService = $friendService;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             FriendCreatedEvent::class => 'onFriendCreated',
