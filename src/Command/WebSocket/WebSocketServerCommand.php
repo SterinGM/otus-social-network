@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\WebSocket;
 
 use App\WebSocket\WebSocketServer;
 use Exception;
+use Ratchet\Http\HttpServer;
+use Ratchet\Server\IoServer;
+use Ratchet\WebSocket\WsServer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Ratchet\Server\IoServer;
-use Ratchet\Http\HttpServer;
-use Ratchet\WebSocket\WsServer;
 
 #[AsCommand(
     name: 'app:websocket:serve',

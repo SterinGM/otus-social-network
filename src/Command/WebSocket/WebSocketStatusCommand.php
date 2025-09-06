@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\WebSocket;
 
 use App\WebSocket\WebSocketService;
 use Symfony\Component\Console\Attribute\AsCommand;
