@@ -4,7 +4,6 @@ namespace App\Command\WebSocket;
 
 use App\Message\Post\PostCreatedMessage;
 use App\WebSocket\WebSocketServer;
-use App\WebSocket\WebSocketService;
 use Exception;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
@@ -24,14 +23,12 @@ use Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection;
 )]
 class WebSocketServerCommand extends Command
 {
-    private WebSocketService $webSocketService;
     private WebSocketServer $webSocketServer;
     private int $port;
     private string $dsn;
 
-    public function __construct(WebSocketService $webSocketService, WebSocketServer $webSocketServer, int $port = 8090, string $dsn = '')
+    public function __construct(WebSocketServer $webSocketServer, int $port = 8090, string $dsn = '')
     {
-        $this->webSocketService = $webSocketService;
         $this->webSocketServer = $webSocketServer;
         $this->port = $port;
         $this->dsn = $dsn;
@@ -68,13 +65,18 @@ class WebSocketServerCommand extends Command
 
             $server->loop->addPeriodicTimer(1, function () use ($io, $receiver) {
                 try {
-                    $data = $receiver->getFromQueues(['user_posts_queue']);
+                    $envelops = $receiver->getFromQueues(['user_posts_queue']);
 
-                    foreach ($data as $envelop) {
+                    foreach ($envelops as $envelop) {
                         $message = $envelop->getMessage();
 
                         if ($message instanceof PostCreatedMessage) {
-                            $this->webSocketService->notifyUsersAboutPost($message);
+                            $data = [
+                                'postId' => $message->postId,
+                                'postText' => $message->postText,
+                                'author_user_id' => $message->authorId,
+                            ];
+                            $this->webSocketServer->notifyUsers($message->friendIds, $data, '/post/feed/posted');
                             $receiver->ack($envelop);
                         }
                     }

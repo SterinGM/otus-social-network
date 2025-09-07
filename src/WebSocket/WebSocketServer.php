@@ -16,11 +16,13 @@ class WebSocketServer implements MessageComponentInterface
     private array $userConnections;
     private LoggerInterface $logger;
     private ApiTokenHandler $apiTokenHandler;
+    private array $channels;
 
     public function __construct(LoggerInterface $logger, ApiTokenHandler $apiTokenHandler)
     {
         $this->clients = new SplObjectStorage();
         $this->userConnections = [];
+        $this->channels = [];
         $this->logger = $logger;
         $this->apiTokenHandler = $apiTokenHandler;
     }
@@ -49,6 +51,14 @@ class WebSocketServer implements MessageComponentInterface
             switch ($data['type']) {
                 case 'authenticate':
                     $this->handleAuthentication($from, $data);
+                    break;
+
+                case 'subscribe':
+                    $this->handleSubscribe($from, $data);
+                    break;
+
+                case 'unsubscribe':
+                    $this->handleUnSubscribe($from, $data);
                     break;
 
                 case 'ping':
@@ -104,24 +114,25 @@ class WebSocketServer implements MessageComponentInterface
         $conn->close();
     }
 
-    public function notifyUsers(array $userIds, array $messageData): int
+    public function notifyUsers(array $userIds, array $messageData, string $channel): int
     {
         $notifiedCount = 0;
 
         foreach ($userIds as $userId) {
-            if (isset($this->userConnections[$userId])) {
-                foreach ($this->userConnections[$userId] as $connection) {
-                    try {
-                        $message = [
-                            'type' => 'new_post',
-                            'data' => $messageData,
-                            'timestamp' => time()
-                        ];
+            if (isset($this->channels[$channel][$userId])) {
+                if (isset($this->userConnections[$userId])) {
+                    foreach ($this->userConnections[$userId] as $connection) {
+                        try {
+                            $message = [
+                                'operationId' => 'postFeedPosted',
+                                'message' => $messageData,
+                            ];
 
-                        $connection->send(json_encode($message));
-                        $notifiedCount++;
-                    } catch (Exception $e) {
-                        $this->logger->error("Failed to send to user {$userId}: {$e->getMessage()}");
+                            $connection->send(json_encode($message));
+                            $notifiedCount++;
+                        } catch (Exception $e) {
+                            $this->logger->error("Failed to send to user {$userId}: {$e->getMessage()}");
+                        }
                     }
                 }
             }
@@ -155,5 +166,52 @@ class WebSocketServer implements MessageComponentInterface
         ]));
 
         $this->logger->info("User {$userId} authenticated via connection {$conn->resourceId}");
+    }
+
+    private function handleSubscribe(ConnectionInterface $conn, array $data)
+    {
+        if (!isset($data['channel'])) {
+            throw new InvalidArgumentException('Channel name required');
+        }
+
+        if (!isset($conn->userId)) {
+            throw new InvalidArgumentException('Authenticated required');
+        }
+
+        if (!isset($this->channels[$data['channel']])) {
+            $this->channels[$data['channel']] = [];
+        }
+        $this->channels[$data['channel']][$conn->userId] = $conn;
+
+        $conn->send(json_encode([
+            'type' => 'subscribe',
+            'success' => true,
+            'user_id' => $conn->userId,
+            'channel' => $data['channel'],
+            'timestamp' => time()
+        ]));
+    }
+
+    private function handleUnSubscribe(ConnectionInterface $conn, array $data)
+    {
+        if (!isset($data['channel'])) {
+            throw new InvalidArgumentException('Channel name required');
+        }
+
+        if (!isset($conn->userId)) {
+            throw new InvalidArgumentException('Authenticated required');
+        }
+
+        if (isset($this->channels[$data['channel']][$conn->userId])) {
+            unset($this->channels[$data['channel']][$conn->userId]);
+        }
+
+        $conn->send(json_encode([
+            'type' => 'unsubscribe',
+            'success' => true,
+            'user_id' => $conn->userId,
+            'channel' => $data['channel'],
+            'timestamp' => time()
+        ]));
     }
 }

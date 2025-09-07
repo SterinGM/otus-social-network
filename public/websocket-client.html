@@ -27,7 +27,14 @@
 </div>
 
 <div>
-    <label for="message">Message:</label>
+    <label for="channel">Channel:</label>
+    <input type="text" id="channel" value="/post/feed/posted">
+    <button onclick="subscribe()">Subscribe</button>
+    <button onclick="unsubscribe()">UnSubscribe</button>
+</div>
+
+<div>
+    <label for="message">Test message:</label>
     <input type="text" id="message" placeholder="Enter message">
     <button onclick="sendMessage()">Send</button>
 </div>
@@ -150,6 +157,46 @@
 
         ws.send(JSON.stringify(data));
         addMessage(`Sent authentication by user token ${userToken}`);
+    }
+
+    function subscribe() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const channel = document.getElementById('channel').value;
+        if (!channel) {
+            addMessage('Please enter channel name', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'subscribe',
+            channel: channel
+        };
+
+        ws.send(JSON.stringify(data));
+    }
+
+    function unsubscribe() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const channel = document.getElementById('channel').value;
+        if (!channel) {
+            addMessage('Please enter channel name', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'unsubscribe',
+            channel: channel
+        };
+
+        ws.send(JSON.stringify(data));
     }
 
     // Auto-connect on page load
