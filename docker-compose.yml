@@ -25,6 +25,20 @@ services:
         volumes:
             - .:/var/www/app
 
+    websocket:
+      container_name: socnet-websocket
+      build: ./docker/websocket/
+      working_dir: /var/www/app
+      depends_on:
+        - php
+        - mariadb
+      ports:
+        - 127.0.0.1:8090:8090
+      environment:
+        - WEBSOCKET_PORT=8090
+      volumes:
+        - .:/var/www/app
+
     mariadb:
         container_name: socnet-db
         image: mariadb:11.7.2

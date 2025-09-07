@@ -23,7 +23,7 @@ class WebSocketServerCommand extends Command
     private WebSocketServer $webSocketServer;
     private int $port;
 
-    public function __construct(WebSocketServer $webSocketServer, int $port = 3001)
+    public function __construct(WebSocketServer $webSocketServer, int $port = 8090)
     {
         $this->webSocketServer = $webSocketServer;
         $this->port = $port;

@@ -60,4 +60,6 @@ docker-compose exec php bin/console app:websocket:serve
 docker-compose exec php bin/console app:websocket:status
 ```
 
-Сервер будет доступен по адресу __127.0.0.1:3001__
+Сервер будет доступен по адресу __127.0.0.1:8090__
+
+Тестовый клиент находится по адресу http://127.0.0.1:8089/websocket-client.html
