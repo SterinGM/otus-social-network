@@ -12,6 +12,8 @@ services:
         volumes:
             - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
             - .:/var/www/app
+        networks:
+            - app_network
 
     php:
         container_name: socnet-php
@@ -19,25 +21,31 @@ services:
         working_dir: /var/www/app
         depends_on:
             - mariadb
+            - rabbitmq
         environment:
             TIMEZONE: Europe/Moscow
             COMPOSER_MEMORY_LIMIT: -1
         volumes:
             - .:/var/www/app
+        networks:
+            - app_network
 
     websocket:
-      container_name: socnet-websocket
-      build: ./docker/websocket/
-      working_dir: /var/www/app
-      depends_on:
-        - php
-        - mariadb
-      ports:
-        - 127.0.0.1:8090:8090
-      environment:
-        - WEBSOCKET_PORT=8090
-      volumes:
-        - .:/var/www/app
+        container_name: socnet-websocket
+        build: ./docker/websocket/
+        working_dir: /var/www/app
+        depends_on:
+            - php
+            - mariadb
+            - rabbitmq
+        ports:
+            - 127.0.0.1:8090:8090
+        environment:
+            - WEBSOCKET_PORT=8090
+        volumes:
+            - .:/var/www/app
+        networks:
+            - app_network
 
     mariadb:
         container_name: socnet-db
@@ -50,6 +58,8 @@ services:
             - 127.0.0.1:3309:3306
         volumes:
             - ./var/lib/mysql-data:/var/lib/mysql
+        networks:
+            - app_network
 
     redis:
         container_name: socnet-redis
@@ -59,6 +69,8 @@ services:
             - 127.0.0.1:6679:6379
         volumes:
             - .:/var/www/app
+        networks:
+            - app_network
 
     rabbitmq:
         container_name: socnet-rabbitmq
@@ -72,3 +84,9 @@ services:
             - ./.env.local
         volumes:
             - ./var/lib/rabbitmq_data:/var/lib/rabbitmq
+        networks:
+            - app_network
+
+networks:
+    app_network:
+        driver: bridge
