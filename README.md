@@ -45,4 +45,16 @@ docker-compose exec php bin/console doctrine:fixtures:load -n
 docker-compose exec php bin/console cache:pool:clear cache.app
 ```
 
-После этого локально проект будет доступен по адресу http://127.0.0.1:8089/  
+После этого локально проект будет доступен по адресу http://127.0.0.1:8089/
+
+### Запуск WebSocket сервера
+
+Для ручного запуска сервера выполните команду
+
+```bash
+docker-compose exec php bin/console app:websocket:serve
+```
+
+Сервер будет доступен по адресу __127.0.0.1:8090__
+
+Тестовый клиент находится по адресу http://127.0.0.1:8089/websocket-client.html

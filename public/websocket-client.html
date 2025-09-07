@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>WebSocket Test Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .message { margin: 5px 0; padding: 5px; background: #f0f0f0; border-radius: 3px; }
+        .system { background: #e3f2fd; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+    </style>
+</head>
+<body>
+<h1>WebSocket Test Client</h1>
+
+<div>
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+    <button onclick="sendPing()">Ping</button>
+</div>
+
+<div>
+    <label for="userToken">Auth Token:</label>
+    <input type="text" id="userToken" value="">
+    <button onclick="authenticate()">Authenticate</button>
+</div>
+
+<div>
+    <label for="channel">Channel:</label>
+    <input type="text" id="channel" value="/post/feed/posted">
+    <button onclick="subscribe()">Subscribe</button>
+    <button onclick="unsubscribe()">UnSubscribe</button>
+</div>
+
+<div>
+    <label for="message">Test message:</label>
+    <input type="text" id="message" placeholder="Enter message">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<h3>Messages:</h3>
+<div id="messages"></div>
+
+<script>
+    let ws = null;
+    const messagesDiv = document.getElementById('messages');
+
+    function addMessage(text, className = '') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${className}`;
+        messageDiv.textContent = new Date().toLocaleTimeString() + ' - ' + text;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function connect() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            addMessage('Already connected', 'system');
+            return;
+        }
+
+        const wsUrl = `ws://127.0.0.1:8090`;
+
+        try {
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                addMessage('Connected to WebSocket server', 'success');
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    addMessage(`Received: ${JSON.stringify(data)}`, 'system');
+                } catch (e) {
+                    addMessage(`Received: ${event.data}`, 'system');
+                }
+            };
+
+            ws.onclose = function() {
+                addMessage('Disconnected from WebSocket server', 'system');
+            };
+
+            ws.onerror = function(error) {
+                console.error(error);
+                addMessage(`WebSocket error: ${error}`, 'error');
+            };
+
+        } catch (error) {
+            addMessage(`Connection error: ${error}`, 'error');
+        }
+    }
+
+    function disconnect() {
+        if (ws) {
+            ws.close();
+            ws = null;
+            addMessage('Disconnected', 'system');
+        }
+    }
+
+    function sendMessage() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const message = document.getElementById('message').value;
+        if (!message) {
+            addMessage('Please enter a message', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'custom_message',
+            content: message,
+            timestamp: new Date().toISOString()
+        };
+
+        ws.send(JSON.stringify(data));
+        addMessage(`Sent: ${message}`);
+        document.getElementById('message').value = '';
+    }
+
+    function sendPing() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'ping',
+            timestamp: Date.now()
+        };
+
+        ws.send(JSON.stringify(data));
+        addMessage('Sent ping');
+    }
+
+    function authenticate() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const userToken = document.getElementById('userToken').value;
+        if (!userToken) {
+            addMessage('Please enter userToken', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'authenticate',
+            user_token: userToken
+        };
+
+        ws.send(JSON.stringify(data));
+        addMessage(`Sent authentication by user token ${userToken}`);
+    }
+
+    function subscribe() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const channel = document.getElementById('channel').value;
+        if (!channel) {
+            addMessage('Please enter channel name', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'subscribe',
+            channel: channel
+        };
+
+        ws.send(JSON.stringify(data));
+    }
+
+    function unsubscribe() {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            addMessage('Not connected to WebSocket server', 'error');
+            return;
+        }
+
+        const channel = document.getElementById('channel').value;
+        if (!channel) {
+            addMessage('Please enter channel name', 'error');
+            return;
+        }
+
+        const data = {
+            type: 'unsubscribe',
+            channel: channel
+        };
+
+        ws.send(JSON.stringify(data));
+    }
+
+    // Auto-connect on page load
+    window.addEventListener('load', function() {
+        addMessage('Page loaded. Click "Connect" to start.', 'system');
+    });
+</script>
+</body>
+</html>

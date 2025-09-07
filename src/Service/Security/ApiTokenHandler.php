@@ -21,7 +21,7 @@ class ApiTokenHandler implements AccessTokenHandlerInterface
         $apiToken = $this->repository->getByToken($accessToken);
 
         if (!$apiToken) {
-            throw new BadCredentialsException();
+            throw new BadCredentialsException('Invalid API token');
         }
 
         return new UserBadge($apiToken->getUserId());
