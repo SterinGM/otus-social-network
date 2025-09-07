@@ -63,18 +63,20 @@ class WebSocketServerCommand extends Command
             $io->text('Use http://localhost:8089/websocket-client.html to test');
 
             $server->loop->addPeriodicTimer(1, function () use ($io) {
-                $connection = Connection::fromDsn($this->dsn);
-                $receiver = new AmqpReceiver($connection);
-                $data = $receiver->getFromQueues(['user_posts_queue']);
+                try {
+                    $connection = Connection::fromDsn($this->dsn);
+                    $receiver = new AmqpReceiver($connection);
+                    $data = $receiver->getFromQueues(['user_posts_queue']);
 
-                foreach ($data as $envelop) {
-                    $message = $envelop->getMessage();
+                    foreach ($data as $envelop) {
+                        $message = $envelop->getMessage();
 
-                    if ($message instanceof PostCreatedMessage) {
-                        $this->webSocketService->notifyUsersAboutPost($message);
-                        $receiver->ack($envelop);
+                        if ($message instanceof PostCreatedMessage) {
+                            $this->webSocketService->notifyUsersAboutPost($message);
+                            $receiver->ack($envelop);
+                        }
                     }
-                }
+                } catch (Exception $exception) {}
             });
 
             $server->run();
