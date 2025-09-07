@@ -58,6 +58,14 @@ class WebSocketServer implements MessageComponentInterface
                     ]));
                     break;
 
+                case 'custom_message':
+                    $from->send(json_encode([
+                        'type' => 'message',
+                        'message' => $data['content'] ?? '',
+                        'timestamp' => time()
+                    ]));
+                    break;
+
                 default:
                     $from->send(json_encode([
                         'type' => 'error',
