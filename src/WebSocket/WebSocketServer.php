@@ -2,6 +2,7 @@
 
 namespace App\WebSocket;
 
+use App\Service\Security\ApiTokenHandler;
 use Exception;
 use InvalidArgumentException;
 use Ratchet\MessageComponentInterface;
@@ -14,12 +15,14 @@ class WebSocketServer implements MessageComponentInterface
     private SplObjectStorage $clients;
     private array $userConnections;
     private LoggerInterface $logger;
+    private ApiTokenHandler $apiTokenHandler;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, ApiTokenHandler $apiTokenHandler)
     {
         $this->clients = new SplObjectStorage();
         $this->userConnections = [];
         $this->logger = $logger;
+        $this->apiTokenHandler = $apiTokenHandler;
     }
 
     public function onOpen(ConnectionInterface $conn): void
@@ -29,7 +32,7 @@ class WebSocketServer implements MessageComponentInterface
 
         $conn->send(json_encode([
             'type' => 'connected',
-            'message' => 'Welcome to Post WebSocket Server',
+            'message' => 'Welcome to WebSocket Server',
             'timestamp' => time()
         ]));
     }
@@ -138,11 +141,11 @@ class WebSocketServer implements MessageComponentInterface
 
     private function handleAuthentication(ConnectionInterface $conn, array $data): void
     {
-        if (!isset($data['user_id'])) {
-            throw new InvalidArgumentException('User ID required');
+        if (!isset($data['user_token'])) {
+            throw new InvalidArgumentException('User Token required');
         }
 
-        $userId = (int) $data['user_id'];
+        $userId = $this->apiTokenHandler->getUserBadgeFrom($data['user_token'])->getUserIdentifier();
         $conn->userId = $userId;
 
         if (!isset($this->userConnections[$userId])) {

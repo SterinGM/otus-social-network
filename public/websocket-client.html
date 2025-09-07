@@ -137,19 +137,19 @@
             return;
         }
 
-        const userId = document.getElementById('userId').value;
-        if (!userId) {
-            addMessage('Please enter User ID', 'error');
+        const userToken = document.getElementById('userToken').value;
+        if (!userToken) {
+            addMessage('Please enter userToken', 'error');
             return;
         }
 
         const data = {
             type: 'authenticate',
-            user_id: parseInt(userId)
+            user_token: userToken
         };
 
         ws.send(JSON.stringify(data));
-        addMessage(`Sent authentication for user ${userId}`);
+        addMessage(`Sent authentication for user ${userToken}`);
     }
 
     // Auto-connect on page load
