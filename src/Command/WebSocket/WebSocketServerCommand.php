@@ -62,10 +62,12 @@ class WebSocketServerCommand extends Command
             $io->note('Press Ctrl+C to stop the server');
             $io->text('Use http://localhost:8089/websocket-client.html to test');
 
-            $server->loop->addPeriodicTimer(1, function () use ($io) {
+            $receiver = new AmqpReceiver(
+                Connection::fromDsn($this->dsn)
+            );
+
+            $server->loop->addPeriodicTimer(1, function () use ($io, $receiver) {
                 try {
-                    $connection = Connection::fromDsn($this->dsn);
-                    $receiver = new AmqpReceiver($connection);
                     $data = $receiver->getFromQueues(['user_posts_queue']);
 
                     foreach ($data as $envelop) {
@@ -76,7 +78,7 @@ class WebSocketServerCommand extends Command
                             $receiver->ack($envelop);
                         }
                     }
-                } catch (Exception $exception) {}
+                } catch (Exception) {}
             });
 
             $server->run();
