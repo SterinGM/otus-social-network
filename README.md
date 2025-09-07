@@ -54,11 +54,6 @@ docker-compose exec php bin/console cache:pool:clear cache.app
 ```bash
 docker-compose exec php bin/console app:websocket:serve
 ```
-Для просмотра статистики сервера выполните команду
-
-```bash
-docker-compose exec php bin/console app:websocket:status
-```
 
 Сервер будет доступен по адресу __127.0.0.1:8090__
 

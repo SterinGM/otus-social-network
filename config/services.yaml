@@ -29,8 +29,8 @@ services:
         arguments:
             $feed: '@App\Service\Post\Feed'
 
-
     # Commands
     App\Command\WebSocket\WebSocketServerCommand:
         arguments:
             $port: '%env(resolve:WEBSOCKET_PORT)%'
+            $dsn: '%env(resolve:MESSENGER_TRANSPORT_DSN)%'

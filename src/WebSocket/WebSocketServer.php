@@ -132,23 +132,6 @@ class WebSocketServer implements MessageComponentInterface
         return $notifiedCount;
     }
 
-    public function getStats(): array
-    {
-        $totalUsers = count($this->userConnections);
-        $totalConnections = 0;
-
-        foreach ($this->userConnections as $connections) {
-            $totalConnections += count($connections);
-        }
-
-        return [
-            'total_connections' => $this->clients->count(),
-            'authenticated_users' => $totalUsers,
-            'total_user_connections' => $totalConnections,
-            'users' => array_keys($this->userConnections)
-        ];
-    }
-
     private function handleAuthentication(ConnectionInterface $conn, array $data): void
     {
         if (!isset($data['user_token'])) {
