@@ -9,7 +9,7 @@
         "ext-iconv": "*",
         "cboden/ratchet": "0.4.x-dev",
         "doctrine/dbal": "^3.10.2",
-        "doctrine/doctrine-bundle": "^2.16.1",
+        "doctrine/doctrine-bundle": "^2.16.2",
         "doctrine/doctrine-migrations-bundle": "^3.4.2",
         "doctrine/orm": "^3.5.2",
         "fakerphp/faker": "^1.24.1",
