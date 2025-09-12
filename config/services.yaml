@@ -33,4 +33,7 @@ services:
     App\Command\WebSocket\WebSocketServerCommand:
         arguments:
             $port: '%env(resolve:WEBSOCKET_PORT)%'
+
+    App\WebSocket\Consumer\PostConsumer:
+        arguments:
             $dsn: '%env(resolve:MESSENGER_TRANSPORT_DSN)%'

@@ -2,7 +2,7 @@
 
 namespace App\Command\WebSocket;
 
-use App\Message\Post\PostCreatedMessage;
+use App\WebSocket\Consumer\PostConsumer;
 use App\WebSocket\WebSocketServer;
 use Exception;
 use Ratchet\Http\HttpServer;
@@ -13,25 +13,26 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpReceiver;
-use Symfony\Component\Messenger\Bridge\Amqp\Transport\Connection;
 
 #[AsCommand(
     name: 'app:websocket:serve',
-    description: 'Starts the WebSocket server for real-time post notifications',
-    help: 'This command starts a WebSocket server that handles real-time notifications for new posts'
+    description: 'Запускает WebSocket сервер для уведомлений о новых постах в реальном времени',
+    help: 'Эта команда запускает WebSocket сервер, который обрабатывает уведомления о новых постах в реальном времени'
 )]
 class WebSocketServerCommand extends Command
 {
     private WebSocketServer $webSocketServer;
+    private PostConsumer $postNotificationConsumer;
     private int $port;
-    private string $dsn;
 
-    public function __construct(WebSocketServer $webSocketServer, int $port = 8090, string $dsn = '')
-    {
+    public function __construct(
+        WebSocketServer $webSocketServer,
+        PostConsumer    $postNotificationConsumer,
+        int             $port = 8090
+    ) {
         $this->webSocketServer = $webSocketServer;
+        $this->postNotificationConsumer = $postNotificationConsumer;
         $this->port = $port;
-        $this->dsn = $dsn;
 
         parent::__construct();
     }
@@ -39,58 +40,53 @@ class WebSocketServerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $io->title('🚀 Starting Symfony WebSocket Server');
-        $io->text([
-            "Port: {$this->port}",
-            "PID: " . getmypid(),
-            "Time: " . date('Y-m-d H:i:s')
-        ]);
+        $this->displayServerInfo($io);
 
         try {
-            $server = IoServer::factory(
-                new HttpServer(
-                    new WsServer($this->webSocketServer)
-                ),
-                $this->port
-            );
-
-            $io->success("WebSocket server running on port {$this->port}");
-            $io->note('Press Ctrl+C to stop the server');
-            $io->text('Use http://localhost:8089/websocket-client.html to test');
-
-            $receiver = new AmqpReceiver(
-                Connection::fromDsn($this->dsn)
-            );
-
-            $server->loop->addPeriodicTimer(1, function () use ($io, $receiver) {
-                try {
-                    $envelops = $receiver->getFromQueues(['user_posts_queue']);
-
-                    foreach ($envelops as $envelop) {
-                        $message = $envelop->getMessage();
-
-                        if ($message instanceof PostCreatedMessage) {
-                            $data = [
-                                'postId' => $message->postId,
-                                'postText' => $message->postText,
-                                'author_user_id' => $message->authorId,
-                            ];
-                            $this->webSocketServer->notifyUsers($message->friendIds, $data, '/post/feed/posted');
-                            $receiver->ack($envelop);
-                        }
-                    }
-                } catch (Exception) {}
-            });
-
+            $server = $this->createWebSocketServer();
+            $this->displaySuccessMessage($io);
+            $this->setupMessageReceiver($server);
             $server->run();
 
+            return Command::SUCCESS;
         } catch (Exception $e) {
-            $io->error("Failed to start WebSocket server: " . $e->getMessage());
+            $io->error(sprintf('Не удалось запустить WebSocket сервер: %s', $e->getMessage()));
 
             return Command::FAILURE;
         }
+    }
 
-        return Command::SUCCESS;
+    private function displayServerInfo(SymfonyStyle $io): void
+    {
+        $io->title('🚀 Запуск WebSocket сервера Symfony');
+        $io->text([
+            sprintf('Порт: %d', $this->port),
+            sprintf('PID: %s', getmypid()),
+            sprintf('Время: %s', date('Y-m-d H:i:s'))
+        ]);
+    }
+
+    private function createWebSocketServer(): IoServer
+    {
+        return IoServer::factory(
+            new HttpServer(
+                new WsServer($this->webSocketServer)
+            ),
+            $this->port
+        );
+    }
+
+    private function displaySuccessMessage(SymfonyStyle $io): void
+    {
+        $io->success(sprintf('WebSocket сервер запущен на порту %d', $this->port));
+        $io->note('Нажмите Ctrl+C для остановки сервера');
+        $io->text('Используйте http://localhost:8089/websocket-client.html для тестирования');
+    }
+
+    private function setupMessageReceiver(IoServer $server): void
+    {
+        $server->loop->addPeriodicTimer(1, function () {
+            $this->postNotificationConsumer->processMessages();
+        });
     }
 }
