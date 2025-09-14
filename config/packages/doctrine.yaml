@@ -25,24 +25,24 @@ doctrine:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
                 connection: main
                 mappings:
-                    App:
+                    AppMain:
                         type: attribute
                         is_bundle: false
                         dir: '%kernel.project_dir%/src/Entity/Main'
                         prefix: 'App\Entity\Main'
-                        alias: App
+                        alias: Main
             dialog:
                 report_fields_where_declared: true
                 validate_xml_mapping: true
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
                 connection: dialog
                 mappings:
-                    App:
+                    AppDialog:
                         type: attribute
                         is_bundle: false
                         dir: '%kernel.project_dir%/src/Entity/Dialog'
                         prefix: 'App\Entity\Dialog'
-                        alias: App
+                        alias: Dialog
 
 when@test:
     doctrine:
