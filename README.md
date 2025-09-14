@@ -34,10 +34,10 @@ docker-compose exec php bin/console doctrine:database:create --if-not-exists -c 
 Для применения миграций выполните команду
 
 ```bash
-docker-compose exec php bin/console doctrine:migration:migrate -n --configuration=config/migrations/main.yaml
+docker-compose exec php bin/console doctrine:migration:migrate -n --em=main --configuration=config/migrations/main.yaml
 ```
 ```bash
-docker-compose exec php bin/console doctrine:migration:migrate -n --configuration=config/migrations/dialog.yaml
+docker-compose exec php bin/console doctrine:migration:migrate -n --em=dialog --configuration=config/migrations/dialog.yaml
 ```
 Если вам нужны тестовые данные для разработки, то можно загрузить фикстуры  
 Процесс генерации занимает значительное время
