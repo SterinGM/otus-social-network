@@ -2,9 +2,13 @@
 
 namespace App\Repository\Dialog;
 
+use App\DTO\Post\Request\FeedRequest;
+use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -35,5 +39,42 @@ class MessageRepository extends ServiceEntityRepository
         $statement->bindValue('user_id', $message->getUserId());
         $statement->bindValue('created_at', $message->getCreatedAt()->format(self::DATE_FORMAT));
         $statement->executeStatement();
+    }
+
+    public function getMessages(Chat $chat)
+    {
+        $sql = 'SELECT * FROM message WHERE chat_id = :chat_id ORDER BY id DESC';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue('chat_id', $chat->getId());
+        $result = $statement->executeQuery();
+
+        return $this->mapList($chat, $result->fetchAllAssociative());
+    }
+
+    private function mapMessage(Chat $chat, array $data): Message
+    {
+        return new Message()
+            ->setId($data['id'])
+            ->setChat($chat)
+            ->setContent($data['content'])
+            ->setUserId($data['user_id'])
+            ->setCreatedAt(new DateTimeImmutable($data['created_at']));
+    }
+
+    /**
+     * @return Message[]
+     */
+    private function mapList(Chat $chat, array $list): array
+    {
+        $result = [];
+
+        foreach ($list as $data) {
+            $post = $this->mapMessage($chat, $data);
+
+            $result[$post->getId()] = $post;
+        }
+
+        return $result;
     }
 }
