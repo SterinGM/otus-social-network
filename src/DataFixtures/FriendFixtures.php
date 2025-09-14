@@ -3,8 +3,8 @@
 namespace App\DataFixtures;
 
 use App\DTO\Friend\Request\SetRequest;
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Entity\Main\User;
+use App\Repository\Main\UserRepository;
 use App\Service\Friend\Friend;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;

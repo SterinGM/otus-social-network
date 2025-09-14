@@ -2,7 +2,7 @@
 
 namespace App\DTO\User;
 
-use App\Entity\User as UserEntity;
+use App\Entity\Main\User as UserEntity;
 
 class User
 {

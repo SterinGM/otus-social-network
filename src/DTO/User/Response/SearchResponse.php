@@ -3,7 +3,7 @@
 namespace App\DTO\User\Response;
 
 use App\DTO\User\User;
-use App\Entity\User as UserEntity;
+use App\Entity\Main\User as UserEntity;
 
 class SearchResponse
 {

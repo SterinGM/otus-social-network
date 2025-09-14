@@ -2,7 +2,7 @@
 
 namespace App\Service\Post;
 
-use App\Entity\Post;
+use App\Entity\Main\Post;
 use App\Message\Post\PostCreatedMessage;
 use App\Service\Friend\FriendInterface;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpStamp;

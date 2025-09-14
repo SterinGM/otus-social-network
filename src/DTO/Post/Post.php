@@ -2,7 +2,7 @@
 
 namespace App\DTO\Post;
 
-use App\Entity\Post as PostDoctrine;
+use App\Entity\Main\Post as PostDoctrine;
 
 class Post
 {

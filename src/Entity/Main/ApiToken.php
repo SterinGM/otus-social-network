@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Main;
 
-use App\Repository\ApiTokenRepository;
+use App\Repository\Main\ApiTokenRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 

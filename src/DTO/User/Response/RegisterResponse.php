@@ -2,7 +2,7 @@
 
 namespace App\DTO\User\Response;
 
-use App\Entity\User;
+use App\Entity\Main\User;
 
 class RegisterResponse
 {

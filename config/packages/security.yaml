@@ -7,7 +7,7 @@ security:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
-                class: App\Entity\User
+                class: App\Entity\Main\User
                 property: id
     firewalls:
         dev:
@@ -34,6 +34,7 @@ security:
         # - { path: ^/admin, roles: ROLE_ADMIN }
          - { path: ^/friend, roles: ROLE_USER }
          - { path: ^/post, roles: ROLE_USER }
+         - { path: ^/dialog, roles: ROLE_USER }
 
 when@test:
     security:

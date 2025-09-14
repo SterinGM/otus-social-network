@@ -26,15 +26,21 @@ docker-compose exec php composer install
 Если вам необходимо создать БД, то выполните команду
 
 ```bash
-docker-compose exec php bin/console doctrine:database:create --if-not-exists
+docker-compose exec php bin/console doctrine:database:create --if-not-exists -c main
+```
+```bash
+docker-compose exec php bin/console doctrine:database:create --if-not-exists -c dialog
 ```
 Для применения миграций выполните команду
-Процесс генерации занимает значительное время
 
 ```bash
-docker-compose exec php bin/console doctrine:migration:migrate -n
+docker-compose exec php bin/console doctrine:migration:migrate -n --em=main --configuration=config/migrations/main.yaml
 ```
-Если вам нужны тестовые данные для разработки, то можно загрузить фикстуры
+```bash
+docker-compose exec php bin/console doctrine:migration:migrate -n --em=dialog --configuration=config/migrations/dialog.yaml
+```
+Если вам нужны тестовые данные для разработки, то можно загрузить фикстуры  
+Процесс генерации занимает значительное время
 
 ```bash
 docker-compose exec php bin/console doctrine:fixtures:load -n
@@ -55,6 +61,6 @@ docker-compose exec php bin/console cache:pool:clear cache.app
 docker-compose exec php bin/console app:websocket:serve
 ```
 
-Сервер будет доступен по адресу __127.0.0.1:8090__
+Сервер будет доступен по адресу `ws://127.0.0.1:8090`
 
 Тестовый клиент находится по адресу http://127.0.0.1:8089/websocket-client.html

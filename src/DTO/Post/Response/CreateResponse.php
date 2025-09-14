@@ -2,7 +2,7 @@
 
 namespace App\DTO\Post\Response;
 
-use App\Entity\Post;
+use App\Entity\Main\Post;
 
 class CreateResponse
 {

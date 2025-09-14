@@ -2,7 +2,7 @@
 
 namespace App\Event\Post;
 
-use App\Entity\Post;
+use App\Entity\Main\Post;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class PostCreatedEvent extends Event

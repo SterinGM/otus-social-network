@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Main;
 
 use App\DTO\Post\Request\FeedRequest;
-use App\Entity\Post;
-use App\Entity\User;
+use App\Entity\Main\Post;
+use App\Entity\Main\User;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;

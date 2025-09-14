@@ -3,8 +3,8 @@
 namespace App\Service\User;
 
 use App\DTO\User\Request\RegisterRequest;
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Entity\Main\User;
+use App\Repository\Main\UserRepository;
 use DateTimeImmutable;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;

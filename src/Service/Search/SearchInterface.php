@@ -3,7 +3,7 @@
 namespace App\Service\Search;
 
 use App\DTO\User\Request\SearchRequest;
-use App\Entity\User;
+use App\Entity\Main\User;
 
 interface SearchInterface
 {

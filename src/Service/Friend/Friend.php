@@ -4,11 +4,11 @@ namespace App\Service\Friend;
 
 use App\DTO\Friend\Request\DeleteRequest;
 use App\DTO\Friend\Request\SetRequest;
-use App\Entity\User;
+use App\Entity\Main\User;
 use App\Event\Friend\FriendCreatedEvent;
 use App\Event\Friend\FriendDeletedEvent;
-use App\Repository\FriendRepository;
-use App\Repository\UserRepository;
+use App\Repository\Main\FriendRepository;
+use App\Repository\Main\UserRepository;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Friend implements FriendInterface

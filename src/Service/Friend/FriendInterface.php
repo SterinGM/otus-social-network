@@ -4,7 +4,7 @@ namespace App\Service\Friend;
 
 use App\DTO\Friend\Request\DeleteRequest;
 use App\DTO\Friend\Request\SetRequest;
-use App\Entity\User;
+use App\Entity\Main\User;
 
 interface FriendInterface
 {

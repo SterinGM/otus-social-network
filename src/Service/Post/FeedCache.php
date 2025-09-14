@@ -3,7 +3,7 @@
 namespace App\Service\Post;
 
 use App\DTO\Post\Request\FeedRequest;
-use App\Entity\Post;
+use App\Entity\Main\Post;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 

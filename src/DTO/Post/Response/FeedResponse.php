@@ -3,7 +3,7 @@
 namespace App\DTO\Post\Response;
 
 use App\DTO\Post\Post;
-use App\Entity\Post as PostDoctrine;
+use App\Entity\Main\Post as PostDoctrine;
 
 class FeedResponse
 {
