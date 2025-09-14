@@ -28,10 +28,6 @@ class Dialog implements DialogInterface
 
     public function sendMessage(SendRequest $sendRequest): void
     {
-        if ($sendRequest->userId === $sendRequest->fromUserId) {
-            return;
-        }
-
         $user = $this->userRepository->getById($sendRequest->userId);
 
         if ($user === null) {
