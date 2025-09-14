@@ -1,0 +1,6 @@
+migrations_paths:
+    'DoctrineMigrations': '../../migrations/main'
+all_or_nothing: true
+em: main
+table_storage:
+    table_name: doctrine_migration_versions
