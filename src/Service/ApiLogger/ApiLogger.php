@@ -2,8 +2,8 @@
 
 namespace App\Service\ApiLogger;
 
-use App\Entity\ApiLog;
-use App\Repository\ApiLogRepository;
+use App\Entity\Main\ApiLog;
+use App\Repository\Main\ApiLogRepository;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Uid\Uuid;

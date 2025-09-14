@@ -3,9 +3,9 @@
 namespace App\Service\Security;
 
 use App\DTO\Auth\Request\LoginRequest;
-use App\Entity\ApiToken;
-use App\Repository\ApiTokenRepository;
-use App\Repository\UserRepository;
+use App\Entity\Main\ApiToken;
+use App\Repository\Main\ApiTokenRepository;
+use App\Repository\Main\UserRepository;
 use App\Service\Exception\InvalidCredentialsException;
 use App\Service\Exception\UserNotFoundException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;

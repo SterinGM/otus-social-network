@@ -3,7 +3,7 @@
 namespace App\Service\Search;
 
 use App\DTO\User\Request\SearchRequest;
-use App\Repository\UserRepository;
+use App\Repository\Main\UserRepository;
 
 class Search implements SearchInterface
 {

@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\Entity\User;
+use App\Entity\Main\User;
 use App\Service\ApiLogger\ApiData;
 use App\Service\ApiLogger\ApiLoggerInterface;
 use Exception;

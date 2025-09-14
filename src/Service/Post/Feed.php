@@ -3,7 +3,7 @@
 namespace App\Service\Post;
 
 use App\DTO\Post\Request\FeedRequest;
-use App\Repository\PostRepository;
+use App\Repository\Main\PostRepository;
 
 class Feed implements FeedInterface
 {

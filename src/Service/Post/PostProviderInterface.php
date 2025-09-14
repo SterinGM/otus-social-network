@@ -6,7 +6,7 @@ use App\DTO\Post\Request\CreateRequest;
 use App\DTO\Post\Request\DeleteRequest;
 use App\DTO\Post\Request\GetRequest;
 use App\DTO\Post\Request\UpdateRequest;
-use App\Entity\Post;
+use App\Entity\Main\Post;
 
 interface PostProviderInterface
 {

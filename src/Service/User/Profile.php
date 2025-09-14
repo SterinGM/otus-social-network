@@ -2,8 +2,8 @@
 
 namespace App\Service\User;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Entity\Main\User;
+use App\Repository\Main\UserRepository;
 use App\Service\Exception\UserNotFoundException;
 
 class Profile

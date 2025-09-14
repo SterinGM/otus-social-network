@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Main;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 
 class FriendRepository

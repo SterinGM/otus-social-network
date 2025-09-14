@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\DTO\Post\Request\CreateRequest;
-use App\Repository\UserRepository;
+use App\Repository\Main\UserRepository;
 use App\Service\Post\PostProviderInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;

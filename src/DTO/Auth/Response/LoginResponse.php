@@ -2,7 +2,7 @@
 
 namespace App\DTO\Auth\Response;
 
-use App\Entity\ApiToken;
+use App\Entity\Main\ApiToken;
 
 class LoginResponse
 {
