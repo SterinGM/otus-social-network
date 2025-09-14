@@ -4,6 +4,7 @@ namespace App\Service\Dialog;
 
 use App\DTO\Dialog\Request\SendRequest;
 use App\Entity\Dialog\Chat;
+use App\Entity\Dialog\Message;
 use App\Repository\Dialog\ChatRepository;
 use App\Repository\Dialog\MessageRepository;
 use App\Repository\Main\UserRepository;
@@ -37,12 +38,15 @@ class Dialog implements DialogInterface
             return;
         }
 
-        $chat = $this->getChat($sendRequest->fromUserId, $sendRequest->userId);
+        $chat = $this->getOrCreateChat($sendRequest->fromUserId, $sendRequest->userId);
 
-        dump($chat);
+        $message = $this->getMessage($chat, $sendRequest);
+
+        $this->messageRepository->createMessage($message);
+
     }
 
-    private function getChat(string $userId1, string $userId2): Chat
+    private function getOrCreateChat(string $userId1, string $userId2): Chat
     {
         $chat = $this->chatRepository->getChatByUsers($userId1, $userId2);
 
@@ -55,5 +59,14 @@ class Dialog implements DialogInterface
         }
 
         return $chat;
+    }
+
+    public function getMessage(Chat $chat, SendRequest $sendRequest): Message
+    {
+        return new Message()
+            ->setId(Uuid::v7()->toRfc4122())
+            ->setChat($chat)
+            ->setContent($sendRequest->test)
+            ->setUserId($sendRequest->fromUserId);
     }
 }

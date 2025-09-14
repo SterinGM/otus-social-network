@@ -23,10 +23,13 @@ class ChatRepository extends ServiceEntityRepository
 
     public function getChatByUsers(string $userId1, string $userId2): ?Chat
     {
+        $userIds = [$userId1, $userId2];
+        sort($userIds);
+
         $sql = 'SELECT * FROM chat WHERE user_ids = :user_ids';
 
         $statement = $this->connection->prepare($sql);
-        $statement->bindValue('user_ids', [$userId1, $userId2]);
+        $statement->bindValue('user_ids', json_encode($userIds));
         $result = $statement->executeQuery();
 
         if (!$result->rowCount()) {
@@ -38,12 +41,11 @@ class ChatRepository extends ServiceEntityRepository
 
     public function createChat(Chat $chat): void
     {
-        $sql = 'INSERT INTO chat(id, user_ids)
-            VALUES(:id, :user_ids, :text, :created_at)';
+        $sql = 'INSERT INTO chat(id, user_ids) VALUES(:id, :user_ids)';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('id', $chat->getId());
-        $statement->bindValue('user_ids', $chat->getUserIds());
+        $statement->bindValue('user_ids', json_encode($chat->getUserIds()));
         $statement->executeStatement();
     }
 
@@ -51,6 +53,6 @@ class ChatRepository extends ServiceEntityRepository
     {
         return new Chat()
             ->setId($data['id'])
-            ->setUserIds($data['userIds']);
+            ->setUserIds(json_decode($data['user_ids']));
     }
 }
