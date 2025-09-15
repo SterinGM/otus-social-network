@@ -3,29 +3,32 @@
 namespace App\DTO\Dialog\Response;
 
 use App\DTO\Dialog\Message;
-use App\DTO\Post\Post;
+use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message as MessageDoctrine;
 
 class ListResponse
 {
-    /**
-     * @var Message[]
-     */
+    public string $chatId;
+    /** @var string[] $userIds */
+    public array $userIds;
+    /** @var Message[] */
     public array $messages;
 
     /**
-     * @param Post[] $messages
+     * @param string[] $userIds
+     * @param Message[] $messages
      */
-    public function __construct(array $messages)
+    public function __construct(string $chatId, array $userIds, array $messages)
     {
+        $this->chatId = $chatId;
+        $this->userIds = $userIds;
         $this->messages = $messages;
     }
 
     /**
      * @param MessageDoctrine[] $doctrineMessages
-     * @return self
      */
-    public static function createFromResult(array $doctrineMessages): self
+    public static function createFromResult(Chat $chat, array $doctrineMessages): self
     {
         $messages = [];
 
@@ -33,6 +36,6 @@ class ListResponse
             $messages[] = Message::createFromMessage($doctrineMessage);
         }
 
-        return new self($messages);
+        return new self($chat->getId(), $chat->getUserIds(), $messages);
     }
 }

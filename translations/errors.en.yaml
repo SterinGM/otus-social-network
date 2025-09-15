@@ -14,3 +14,6 @@ authentication_required: Authentication Required.
 
 # Post
 post_not_found: Post %id% not found.
+
+# Dialog
+chat_not_found: Chat %id% not found.

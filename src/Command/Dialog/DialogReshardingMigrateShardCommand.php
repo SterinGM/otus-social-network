@@ -1,0 +1,132 @@
+<?php
+
+namespace App\Command\Dialog;
+
+use App\Entity\Dialog\Chat;
+use App\Repository\Dialog\ChatRepository;
+use App\Repository\Dialog\MessageRepository;
+use App\Service\Dialog\ShardManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Uid\Uuid;
+
+#[AsCommand(
+    name: 'app:dialog:reshard:migrate-shard',
+    description: 'Перенести все чаты и сообщения из указанного старого шарда в новые по новой стратегии.',
+)]
+class DialogReshardingMigrateShardCommand extends Command
+{
+    private ShardManager $shardManager;
+    private ChatRepository $chatRepository;
+    private MessageRepository $messageRepository;
+
+    public function __construct(
+        ShardManager      $shardManager,
+        ChatRepository    $chatRepository,
+        MessageRepository $messageRepository
+    ) {
+        $this->shardManager = $shardManager;
+        $this->chatRepository = $chatRepository;
+        $this->messageRepository = $messageRepository;
+
+        parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this->addArgument('old-shard', InputArgument::REQUIRED, 'Номер старого шарда для миграции');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+
+        $oldShard = (int)$input->getArgument('old-shard');
+
+        if ($this->shardManager->isShardMigrated($oldShard)) {
+            $io->success("Все чаты из старого шарда {$oldShard} уже успешно перенесены. Повторный запуск не требуется.");
+
+            return Command::SUCCESS;
+        }
+
+        try {
+            $oldEm = $this->shardManager->getOldShardEntityManager($oldShard);
+        } catch (Exception) {
+            $io->error('<error>Неверный номер старого шарда.</error>');
+
+            return Command::FAILURE;
+        }
+
+        $migrateBoundary = Uuid::v7()->toRfc4122();
+
+        $chats = $this->chatRepository->getAllChats($oldEm);
+
+        $this->migrateChats($chats, $io, $oldShard);
+
+        $this->migrateNewMessages($chats, $io, $oldShard, $migrateBoundary, $oldEm);
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * @param Chat[] $chats
+     */
+    private function migrateChats(array $chats, SymfonyStyle $io, int $oldShard): void
+    {
+        $countShards = ShardManager::DIALOG_NEW_SHARDS_COUNT;
+        $total = count($chats);
+        $batchSize = 100;
+        $n = 0;
+
+        foreach ($chats as $chat) {
+            $shard = $this->shardManager->getShardByChatId($chat->getId(), $countShards);
+            $newEm = $this->shardManager->getNewShardEntityManager($shard);
+
+            try {
+                $this->chatRepository->createChat($chat, $newEm);
+
+                $messages = $this->messageRepository->getAllMessages($chat);
+
+                foreach ($messages as $message) {
+                    $this->messageRepository->createMessage($message, $newEm);
+                }
+            } catch (Exception) {
+                $io->warning("Чат {$chat->getId()} уже мигрировал");
+            }
+
+            if ((++$n % $batchSize) === 0) {
+                $io->info("Перенесено чатов: {$n}/{$total} (старый шард {$oldShard}, новый шард {$shard})");
+            }
+        }
+
+        $this->shardManager->setShardMigrated($oldShard);
+
+        $io->success("Все чаты из старого шарда {$oldShard} успешно перенесены.");
+    }
+
+    /**
+     * @param Chat[] $chats
+     */
+    private function migrateNewMessages(array $chats, SymfonyStyle $io, int $oldShard, string $from, EntityManagerInterface $oldEm): void
+    {
+        foreach ($chats as $chat) {
+            $newEm = $this->shardManager->getEntityManagerForChat($chat->getId());
+
+            try {
+                $messages = $this->messageRepository->getMessagesFromId($chat, $from, $oldEm);
+
+                foreach ($messages as $message) {
+                    $this->messageRepository->createMessage($message, $newEm);
+                }
+            } catch (Exception) {}
+        }
+
+        $io->success("Все новые сообщения из старого шарда {$oldShard} успешно перенесены.");
+    }
+}

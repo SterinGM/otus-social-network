@@ -23,17 +23,24 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
-
+    # Services
     App\Service\Post\FeedInterface: '@App\Service\Post\FeedCache'
     App\Service\Post\FeedCache:
         arguments:
             $feed: '@App\Service\Post\Feed'
 
-    # Commands
-    App\Command\WebSocket\WebSocketServerCommand:
+    App\Service\Dialog\ShardManager:
         arguments:
-            $port: '%env(resolve:WEBSOCKET_PORT)%'
+            $host: 'redis://%env(resolve:REDIS_HOST)%'
+            $em: '@doctrine.orm.dialog_entity_manager'
+            $emShard0: '@doctrine.orm.dialog_0_entity_manager'
+            $emShard1: '@doctrine.orm.dialog_1_entity_manager'
 
     App\WebSocket\Consumer\PostConsumer:
         arguments:
             $dsn: '%env(resolve:MESSENGER_TRANSPORT_DSN)%'
+
+    # Commands
+    App\Command\WebSocket\WebSocketServerCommand:
+        arguments:
+            $port: '%env(resolve:WEBSOCKET_PORT)%'

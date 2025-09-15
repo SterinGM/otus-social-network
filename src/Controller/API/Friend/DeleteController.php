@@ -21,7 +21,7 @@ class DeleteController
     #[Route('/friend/delete/{user_id}', name: 'api_friend_delete', methods: ['PUT'])]
     public function __invoke(UserInterface $user, DeleteRequest $deleteRequest): JsonResponse
     {
-        $deleteRequest->fromUserId = $user->getId();
+        $deleteRequest->fromUserId = $user->getUserIdentifier();
 
         $this->friend->deleteUserFriend($deleteRequest);
 

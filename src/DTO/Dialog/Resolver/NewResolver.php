@@ -2,7 +2,7 @@
 
 namespace App\DTO\Dialog\Resolver;
 
-use App\DTO\Dialog\Request\ListRequest;
+use App\DTO\Dialog\Request\NewRequest;
 use App\Service\ErrorSystem\Errors;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class ListResolver implements ValueResolverInterface
+class NewResolver implements ValueResolverInterface
 {
     private ValidatorInterface $validator;
 
@@ -22,11 +22,11 @@ class ListResolver implements ValueResolverInterface
 
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        if (ListRequest::class !== $argument->getType()) {
+        if (NewRequest::class !== $argument->getType()) {
             return;
         }
 
-        $data = $request->attributes->get('_route_params');
+        $data = $request->attributes->get('_route_params') + $request->getPayload()->all();
         $errors = $this->validate($data);
 
         if (count($errors)) {
@@ -35,13 +35,15 @@ class ListResolver implements ValueResolverInterface
             throw new BadRequestHttpException();
         }
 
-        yield ListRequest::createFromArray($data);
+        yield NewRequest::createFromArray($data);
     }
 
     private function validate(array $data): array
     {
         $constraint = new Assert\Collection(fields: [
-            ListRequest::FIELD_CHAT_ID => new Assert\Uuid,
+            NewRequest::FIELD_USERS => new Assert\All([
+                'constraints' => new Assert\Uuid(),
+            ]),
         ]);
 
         $violations = $this->validator->validate($data, $constraint);

@@ -14,3 +14,6 @@ authentication_required: Необходимо авторизоваться.
 
 # Post
 post_not_found: Пост %id% не найден.
+
+# Dialog
+chat_not_found: Диалог %id% не найден.

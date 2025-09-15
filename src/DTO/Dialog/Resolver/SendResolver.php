@@ -41,7 +41,7 @@ class SendResolver implements ValueResolverInterface
     private function validate(array $data): array
     {
         $constraint = new Assert\Collection(fields: [
-            SendRequest::FIELD_USER_ID => new Assert\Uuid,
+            SendRequest::FIELD_CHAT_ID => new Assert\Uuid,
             SendRequest::FIELD_TEXT => new Assert\Length(min: 1),
         ]);
 

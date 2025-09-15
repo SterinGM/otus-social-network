@@ -21,7 +21,7 @@ class SetController
     #[Route('/friend/set/{user_id}', name: 'api_friend_set', methods: ['PUT'])]
     public function __invoke(UserInterface $user, SetRequest $setRequest): JsonResponse
     {
-        $setRequest->fromUserId = $user->getId();
+        $setRequest->fromUserId = $user->getUserIdentifier();
 
         $this->friend->setUserFriend($setRequest);
 

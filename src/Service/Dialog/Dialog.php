@@ -2,13 +2,12 @@
 
 namespace App\Service\Dialog;
 
-use App\DTO\Dialog\Request\ListRequest;
-use App\DTO\Dialog\Request\SendRequest;
 use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message;
 use App\Repository\Dialog\ChatRepository;
 use App\Repository\Dialog\MessageRepository;
 use App\Repository\Main\UserRepository;
+use App\Service\Exception\ChatNotFoundException;
 use App\Service\Exception\UserNotFoundException;
 use Symfony\Component\Uid\Uuid;
 
@@ -28,55 +27,78 @@ class Dialog implements DialogInterface
         $this->messageRepository = $messageRepository;
     }
 
-    public function sendMessage(SendRequest $sendRequest): void
+    public function createChat(array $userIds): Chat
     {
-        $user = $this->userRepository->getById($sendRequest->userId);
+        $userIds = array_unique($userIds);
 
-        if ($user === null) {
-            throw new UserNotFoundException($sendRequest->userId);
+        foreach ($userIds as $userId) {
+            $user = $this->userRepository->getById($userId);
+
+            if ($user === null) {
+                throw new UserNotFoundException($userId);
+            }
         }
 
-        $chat = $this->getOrCreateChat($sendRequest->fromUserId, $sendRequest->userId);
+        $chat = $this->buildChat($userIds);
 
-        $message = $this->getMessage($chat, $sendRequest);
+        $this->chatRepository->createChat($chat);
 
-        $this->messageRepository->createMessage($message);
+        return $chat;
     }
 
-    public function getMessages(ListRequest $listRequest): array
+    public function getChatById(string $chatId, string $userId): Chat
     {
-        $user = $this->userRepository->getById($listRequest->userId);
+        $chat = $this->chatRepository->getChatById($chatId);
 
-        if ($user === null) {
-            throw new UserNotFoundException($listRequest->userId);
+        if ($chat === null) {
+            throw new ChatNotFoundException($chatId);
         }
 
-        $chat = $this->getOrCreateChat($listRequest->fromUserId, $listRequest->userId);
-
-        return $this->messageRepository->getMessages($chat);
-    }
-
-    private function getOrCreateChat(string $userId1, string $userId2): Chat
-    {
-        $chat = $this->chatRepository->getChatByUsers($userId1, $userId2);
-
-        if ($chat == null) {
-            $chat = new Chat()
-                ->setId(Uuid::v7()->toRfc4122())
-                ->setUserIds([$userId1, $userId2]);
-
-            $this->chatRepository->createChat($chat);
+        if (!in_array($userId, (array)$chat->getUserIds())) {
+            throw new ChatNotFoundException($chatId);
         }
 
         return $chat;
     }
 
-    public function getMessage(Chat $chat, SendRequest $sendRequest): Message
+    public function sendMessage(Chat $chat, string $userId, string $text): Message
+    {
+        if (!in_array($userId, (array)$chat->getUserIds())) {
+            throw new ChatNotFoundException($chat->getId());
+        }
+
+        $message = $this->buildMessage($chat, $userId, $text);
+
+        $this->messageRepository->createMessage($message);
+
+        return $message;
+    }
+
+    public function getMessages(Chat $chat, string $userId): array
+    {
+        if (!in_array($userId, (array)$chat->getUserIds())) {
+            throw new ChatNotFoundException($chat->getId());
+        }
+
+        return $this->messageRepository->getAllMessages($chat);
+    }
+
+    public function buildMessage(Chat $chat, string $userId, string $text): Message
     {
         return new Message()
             ->setId(Uuid::v7()->toRfc4122())
             ->setChat($chat)
-            ->setContent($sendRequest->test)
-            ->setUserId($sendRequest->fromUserId);
+            ->setContent($text)
+            ->setUserId($userId);
+    }
+
+    /**
+     * @param string[] $userIds
+     */
+    public function buildChat(array $userIds): Chat
+    {
+        return new Chat()
+            ->setId(Uuid::v7()->toRfc4122())
+            ->setUserIds($userIds);
     }
 }

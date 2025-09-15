@@ -11,6 +11,17 @@ doctrine:
                 driver: 'pdo_mysql'
                 profiling_collect_backtrace: '%kernel.debug%'
                 use_savepoints: true
+            dialog_0:
+                url: '%env(resolve:DATABASE_URL_DIALOG_0)%'
+                driver: 'pdo_mysql'
+                profiling_collect_backtrace: '%kernel.debug%'
+                use_savepoints: true
+            dialog_1:
+                url: '%env(resolve:DATABASE_URL_DIALOG_1)%'
+                driver: 'pdo_mysql'
+                profiling_collect_backtrace: '%kernel.debug%'
+                use_savepoints: true
+
 
     orm:
         auto_generate_proxy_classes: true
@@ -36,6 +47,30 @@ doctrine:
                 validate_xml_mapping: true
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
                 connection: dialog
+                mappings:
+                    AppDialog:
+                        type: attribute
+                        is_bundle: false
+                        dir: '%kernel.project_dir%/src/Entity/Dialog'
+                        prefix: 'App\Entity\Dialog'
+                        alias: Dialog
+            dialog_0:
+                report_fields_where_declared: true
+                validate_xml_mapping: true
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+                connection: dialog_0
+                mappings:
+                    AppDialog:
+                        type: attribute
+                        is_bundle: false
+                        dir: '%kernel.project_dir%/src/Entity/Dialog'
+                        prefix: 'App\Entity\Dialog'
+                        alias: Dialog
+            dialog_1:
+                report_fields_where_declared: true
+                validate_xml_mapping: true
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+                connection: dialog_1
                 mappings:
                     AppDialog:
                         type: attribute
