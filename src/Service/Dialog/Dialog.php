@@ -46,11 +46,15 @@ class Dialog implements DialogInterface
         return $chat;
     }
 
-    public function getChatById(string $chatId): Chat
+    public function getChatById(string $chatId, string $userId): Chat
     {
         $chat = $this->chatRepository->getChatById($chatId);
 
         if ($chat === null) {
+            throw new ChatNotFoundException($chatId);
+        }
+
+        if (!in_array($userId, (array)$chat->getUserIds())) {
             throw new ChatNotFoundException($chatId);
         }
 
@@ -59,6 +63,10 @@ class Dialog implements DialogInterface
 
     public function sendMessage(Chat $chat, string $userId, string $text): Message
     {
+        if (!in_array($userId, (array)$chat->getUserIds())) {
+            throw new ChatNotFoundException($chat->getId());
+        }
+
         $message = $this->buildMessage($chat, $userId, $text);
 
         $this->messageRepository->createMessage($message);
@@ -66,8 +74,12 @@ class Dialog implements DialogInterface
         return $message;
     }
 
-    public function getMessages(Chat $chat): array
+    public function getMessages(Chat $chat, string $userId): array
     {
+        if (!in_array($userId, (array)$chat->getUserIds())) {
+            throw new ChatNotFoundException($chat->getId());
+        }
+
         return $this->messageRepository->getMessages($chat);
     }
 

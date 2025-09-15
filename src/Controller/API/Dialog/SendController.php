@@ -22,8 +22,9 @@ class SendController
     #[Route('/dialog/{chat_id}/send', name: 'api_dialog_send', methods: ['POST'])]
     public function __invoke(UserInterface $user, SendRequest $sendRequest): JsonResponse
     {
-        $chat = $this->dialog->getChatById($sendRequest->chatId);
-        $message = $this->dialog->sendMessage($chat, $user->getId(), $sendRequest->test);
+        $userId = $user->getUserIdentifier();
+        $chat = $this->dialog->getChatById($sendRequest->chatId, $userId);
+        $message = $this->dialog->sendMessage($chat, $userId, $sendRequest->test);
 
         return ApiJsonResponse::create(SendResponse::createFromMessage($message));
     }

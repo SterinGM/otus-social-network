@@ -12,12 +12,12 @@ interface DialogInterface
      */
     public function createChat(array $userIds): Chat;
 
-    public function getChatById(string $chatId): Chat;
+    public function getChatById(string $chatId, string $userId): Chat;
 
     public function sendMessage(Chat $chat, string $userId, string $text): Message;
 
     /**
      * @return Message[]
      */
-    public function getMessages(Chat $chat): array;
+    public function getMessages(Chat $chat, string $userId): array;
 }

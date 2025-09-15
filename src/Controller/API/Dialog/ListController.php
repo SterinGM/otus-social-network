@@ -22,8 +22,9 @@ class ListController
     #[Route('/dialog/{chat_id}/list', name: 'api_dialog_list', methods: ['GET'])]
     public function __invoke(UserInterface $user, ListRequest $listRequest): JsonResponse
     {
-        $chat = $this->dialog->getChatById($listRequest->chatId);
-        $messages = $this->dialog->getMessages($chat);
+        $userId = $user->getUserIdentifier();
+        $chat = $this->dialog->getChatById($listRequest->chatId, $userId);
+        $messages = $this->dialog->getMessages($chat, $userId);
 
         return ApiJsonResponse::create(ListResponse::createFromResult($chat, $messages));
     }
