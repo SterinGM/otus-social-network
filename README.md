@@ -74,17 +74,19 @@ docker-compose exec php bin/console app:dialog:reshard:set-boundary
 ```
 
 Данные мигрируют строго по одному шарду  
-Для запуска миграции в новые шарды выполните команду указав номер шарда и количество новых шардов 0, 1, 2 и тд.
+Для запуска миграции в новые шарды выполните команду указав номер шарда 0, 1, 2 и тд.
 
 ```bash
-docker-compose exec php bin/console app:dialog:reshard:migrate-shard 0 2
+docker-compose exec php bin/console app:dialog:reshard:migrate-shard 0
 ```
 
-Для удаления границы решардинга выполните команду указав количество старых шардов 1, 2 и тд.
+Для удаления границы решардинга выполните команду
 
 ```bash
-docker-compose exec php bin/console app:dialog:reshard:finish 1
+docker-compose exec php bin/console app:dialog:reshard:finish
 ```
+
+Подробная инструкция по решардингу описана [тут](docs/resharding.md).
 
 ### Запуск WebSocket сервера
 

@@ -41,7 +41,6 @@ class DialogReshardingMigrateShardCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('old-shard', InputArgument::REQUIRED, 'Номер старого шарда для миграции');
-        $this->addArgument('count-shards', InputArgument::REQUIRED, 'Количество новых шардов для миграции');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -49,7 +48,6 @@ class DialogReshardingMigrateShardCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $oldShard = (int)$input->getArgument('old-shard');
-        $countShards = (int)$input->getArgument('count-shards');
 
         if ($this->shardManager->isShardMigrated($oldShard)) {
             $io->success("Все чаты из старого шарда {$oldShard} уже успешно перенесены. Повторный запуск не требуется.");
@@ -69,7 +67,7 @@ class DialogReshardingMigrateShardCommand extends Command
 
         $chats = $this->chatRepository->getAllChats($oldEm);
 
-        $this->migrateChats($chats, $countShards, $io, $oldShard);
+        $this->migrateChats($chats, $io, $oldShard);
 
         $this->migrateNewMessages($chats, $io, $oldShard, $migrateBoundary, $oldEm);
 
@@ -79,8 +77,9 @@ class DialogReshardingMigrateShardCommand extends Command
     /**
      * @param Chat[] $chats
      */
-    private function migrateChats(array $chats, int $countShards, SymfonyStyle $io, int $oldShard): void
+    private function migrateChats(array $chats, SymfonyStyle $io, int $oldShard): void
     {
+        $countShards = ShardManager::DIALOG_NEW_SHARDS_COUNT;
         $total = count($chats);
         $batchSize = 100;
         $n = 0;

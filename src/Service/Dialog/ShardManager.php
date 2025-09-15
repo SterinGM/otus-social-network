@@ -11,6 +11,9 @@ use Symfony\Component\Uid\UuidV7;
 
 class ShardManager
 {
+    public const int DIALOG_OLD_SHARDS_COUNT = 1;
+    public const int DIALOG_NEW_SHARDS_COUNT = 2;
+
     public const string DIALOG_SHARD_MIGRATION_BOUNDARY = 'dialog_shard_migration_boundary';
     public const string DIALOG_SHARD_MIGRATED_PREFIX = 'dialog_shard_migrated_';
 
@@ -42,18 +45,18 @@ class ShardManager
 //        if (!$boundary || $chatId < $boundary) {
 //            $shard = $this->getShardByChatId($chatId);
 //
-//            if (!$this->isShardMigrated($shard)) {
+//            if (!$this->isShardMigrated($shard, self::DIALOG_OLD_SHARDS_COUNT)) {
 //                return $this->getOldShardEntityManager($shard);
 //            }
 //        }
 
         // Новая стратегия
-        $shard = $this->getShardByChatId($chatId, 2);
+        $shard = $this->getShardByChatId($chatId, self::DIALOG_NEW_SHARDS_COUNT);
 
         return $this->getNewShardEntityManager($shard);
     }
 
-    public function getShardByChatId(string $chatId, int $shardCount = 1): string
+    public function getShardByChatId(string $chatId, int $shardCount): string
     {
         $shardKey = (string)(UuidV7::fromString($chatId)->getDateTime()->format('Uu') / 1000);
 
