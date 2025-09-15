@@ -3,13 +3,11 @@
 namespace App\Command\Dialog;
 
 use App\Service\Dialog\ShardManager;
-use Redis;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Cache\Adapter\RedisAdapter;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:dialog:reshard:set-boundary',
@@ -19,24 +17,22 @@ class DialogReshardingSetBoundaryCommand extends Command
 {
     protected static $defaultName = 'app:dialog:reshard:set-boundary';
 
-    private Redis $redis;
+    private ShardManager $shardManager;
 
-    public function __construct(string $host)
+    public function __construct(ShardManager $shardManager)
     {
-        /** @var Redis $redis */
-        $redis = RedisAdapter::createConnection($host);
-        $this->redis = $redis;
+        $this->shardManager = $shardManager;
 
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $newMaxChatId = Uuid::v7()->toRfc4122();
+        $io = new SymfonyStyle($input, $output);
 
-        $this->redis->set(ShardManager::DIALOG_SHARD_MIGRATION_BOUNDARY, Uuid::v7()->toRfc4122());
+        $newMaxChatId = $this->shardManager->setShardingBoundary();
 
-        $output->writeln("Граница миграции установлена: chat_id > $newMaxChatId");
+        $io->success("Граница миграции установлена: chat_id > $newMaxChatId");
 
         return Command::SUCCESS;
     }

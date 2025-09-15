@@ -50,6 +50,12 @@ class DialogReshardingMigrateShardCommand extends Command
         $oldShard = (int)$input->getArgument('old-shard');
         $countShards = (int)$input->getArgument('count-shards');
 
+        if ($this->shardManager->isShardMigrated($oldShard)) {
+            $io->success("Все чаты из старого шарда {$oldShard} уже успешно перенесены. Повторный запуск не требуется.");
+
+            return Command::SUCCESS;
+        }
+
         try {
             $oldEm = $this->shardManager->getOldShardEntityManager($oldShard);
         } catch (Exception) {
@@ -79,13 +85,12 @@ class DialogReshardingMigrateShardCommand extends Command
                 $io->warning("Чат {$chat->getId()} уже мигрировал");
             }
 
-            $newEm->flush();
-            $newEm->clear();
-
             if ((++$n % $batchSize) === 0) {
                 $io->info("Перенесено чатов: {$n}/{$total} (старый шард {$oldShard}, новый шард {$shard})");
             }
         }
+
+        $this->shardManager->setShardMigrated($oldShard);
 
         $io->success("Все чаты из старого шарда {$oldShard} успешно перенесены.");
 

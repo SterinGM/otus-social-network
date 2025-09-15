@@ -41,10 +41,6 @@ services:
             $dsn: '%env(resolve:MESSENGER_TRANSPORT_DSN)%'
 
     # Commands
-    App\Command\Dialog\DialogReshardingSetBoundaryCommand:
-        arguments:
-            $host: 'redis://%env(resolve:REDIS_HOST)%'
-
     App\Command\WebSocket\WebSocketServerCommand:
         arguments:
             $port: '%env(resolve:WEBSOCKET_PORT)%'
