@@ -2,13 +2,12 @@
 
 namespace App\Repository\Dialog;
 
-use App\DTO\Post\Request\FeedRequest;
 use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\ParameterType;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -20,11 +19,11 @@ class MessageRepository extends ServiceEntityRepository
 
     private Connection $connection;
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Message::class);
 
-        $this->connection = $this->getEntityManager()->getConnection();
+        $this->connection = $entityManager->getConnection();
     }
 
     public function createMessage(Message $message): void

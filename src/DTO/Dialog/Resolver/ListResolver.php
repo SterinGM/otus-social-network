@@ -41,7 +41,7 @@ class ListResolver implements ValueResolverInterface
     private function validate(array $data): array
     {
         $constraint = new Assert\Collection(fields: [
-            ListRequest::FIELD_USER_ID => new Assert\Uuid,
+            ListRequest::FIELD_CHAT_ID => new Assert\Uuid,
         ]);
 
         $violations = $this->validator->validate($data, $constraint);

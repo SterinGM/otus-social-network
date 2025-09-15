@@ -5,6 +5,7 @@ namespace App\Repository\Dialog;
 use App\Entity\Dialog\Chat;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,22 +15,19 @@ class ChatRepository extends ServiceEntityRepository
 {
     private Connection $connection;
 
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Chat::class);
 
-        $this->connection = $this->getEntityManager()->getConnection();
+        $this->connection = $entityManager->getConnection();
     }
 
-    public function getChatByUsers(string $userId1, string $userId2): ?Chat
+    public function getChatById(string $chatId): ?Chat
     {
-        $userIds = array_unique([$userId1, $userId2]);
-        sort($userIds);
-
-        $sql = 'SELECT * FROM chat WHERE user_ids = :user_ids';
+        $sql = 'SELECT * FROM chat WHERE id = :chatId';
 
         $statement = $this->connection->prepare($sql);
-        $statement->bindValue('user_ids', json_encode($userIds));
+        $statement->bindValue('chatId', $chatId);
         $result = $statement->executeQuery();
 
         if (!$result->rowCount()) {

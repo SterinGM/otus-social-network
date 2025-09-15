@@ -6,34 +6,25 @@ use App\Entity\Dialog\Message as DoctrineMessage;
 
 class Message
 {
-    public string $from;
-    public string $to;
-    public string $text;
+    private const string DATE_FORMAT = 'Y-m-d H:i:s';
 
-    private function __construct(string $from, string $to, string $text)
+    public string $userId;
+    public string $text;
+    public string $time;
+
+    private function __construct(string $userId, string $text, string $time)
     {
-        $this->from = $from;
-        $this->to = $to;
+        $this->userId = $userId;
         $this->text = $text;
+        $this->time = $time;
     }
 
     public static function createFromMessage(DoctrineMessage $message): self
     {
-        $userIds = $message->getChat()->getUserIds();
-        $fromUserId = $message->getUserId();
-
-        if (count($userIds) === 1) {
-            $toUserId = $fromUserId;
-        } else {
-            $key = array_search($fromUserId, $userIds);
-            unset($userIds[$key]);
-            $toUserId = array_values($userIds)[0];
-        }
-
         return new self(
-            $fromUserId,
-            $toUserId,
-            $message->getContent()
+            $message->getUserId(),
+            $message->getContent(),
+            $message->getCreatedAt()->format(self::DATE_FORMAT)
         );
     }
 }

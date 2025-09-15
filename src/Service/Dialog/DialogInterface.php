@@ -2,16 +2,17 @@
 
 namespace App\Service\Dialog;
 
-use App\DTO\Dialog\Request\ListRequest;
-use App\DTO\Dialog\Request\SendRequest;
+use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message;
 
 interface DialogInterface
 {
-    public function sendMessage(SendRequest $sendRequest): void;
+    public function getChatById(string $chatId): Chat;
+
+    public function sendMessage(Chat $chat, string $userId, string $text): Message;
 
     /**
      * @return Message[]
      */
-    public function getMessages(ListRequest $listRequest): array;
+    public function getMessages(Chat $chat): array;
 }

@@ -2,13 +2,12 @@
 
 namespace App\Service\Dialog;
 
-use App\DTO\Dialog\Request\ListRequest;
-use App\DTO\Dialog\Request\SendRequest;
 use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message;
 use App\Repository\Dialog\ChatRepository;
 use App\Repository\Dialog\MessageRepository;
 use App\Repository\Main\UserRepository;
+use App\Service\Exception\ChatNotFoundException;
 use App\Service\Exception\UserNotFoundException;
 use Symfony\Component\Uid\Uuid;
 
@@ -28,31 +27,28 @@ class Dialog implements DialogInterface
         $this->messageRepository = $messageRepository;
     }
 
-    public function sendMessage(SendRequest $sendRequest): void
+    public function getChatById(string $chatId): Chat
     {
-        $user = $this->userRepository->getById($sendRequest->userId);
+        $chat = $this->chatRepository->getChatById($chatId);
 
-        if ($user === null) {
-            throw new UserNotFoundException($sendRequest->userId);
+        if ($chat === null) {
+            throw new ChatNotFoundException($chatId);
         }
 
-        $chat = $this->getOrCreateChat($sendRequest->fromUserId, $sendRequest->userId);
-
-        $message = $this->getMessage($chat, $sendRequest);
-
-        $this->messageRepository->createMessage($message);
+        return $chat;
     }
 
-    public function getMessages(ListRequest $listRequest): array
+    public function sendMessage(Chat $chat, string $userId, string $text): Message
     {
-        $user = $this->userRepository->getById($listRequest->userId);
+        $message = $this->buildMessage($chat, $userId, $text);
 
-        if ($user === null) {
-            throw new UserNotFoundException($listRequest->userId);
-        }
+        $this->messageRepository->createMessage($message);
 
-        $chat = $this->getOrCreateChat($listRequest->fromUserId, $listRequest->userId);
+        return $message;
+    }
 
+    public function getMessages(Chat $chat): array
+    {
         return $this->messageRepository->getMessages($chat);
     }
 
@@ -71,12 +67,12 @@ class Dialog implements DialogInterface
         return $chat;
     }
 
-    public function getMessage(Chat $chat, SendRequest $sendRequest): Message
+    public function buildMessage(Chat $chat, string $userId, string $text): Message
     {
         return new Message()
             ->setId(Uuid::v7()->toRfc4122())
             ->setChat($chat)
-            ->setContent($sendRequest->test)
-            ->setUserId($sendRequest->fromUserId);
+            ->setContent($text)
+            ->setUserId($userId);
     }
 }

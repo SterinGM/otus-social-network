@@ -4,20 +4,19 @@ namespace App\DTO\Dialog\Request;
 
 class ListRequest
 {
-    public const string FIELD_USER_ID = 'user_id';
+    public const string FIELD_CHAT_ID = 'chat_id';
 
-    public string $userId;
-    public string $fromUserId;
+    public string $chatId;
 
-    private function __construct(string $userId)
+    private function __construct(string $chatId)
     {
-        $this->userId = $userId;
+        $this->chatId = $chatId;
     }
 
     public static function createFromArray(array $data): self
     {
         return new self(
-            $data[self::FIELD_USER_ID],
+            $data[self::FIELD_CHAT_ID],
         );
     }
 }

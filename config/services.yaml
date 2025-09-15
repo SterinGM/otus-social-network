@@ -29,6 +29,14 @@ services:
         arguments:
             $feed: '@App\Service\Post\Feed'
 
+    App\Repository\Dialog\ChatRepository:
+        arguments:
+            $entityManager: '@doctrine.orm.dialog_entity_manager'
+
+    App\Repository\Dialog\MessageRepository:
+        arguments:
+            $entityManager: '@doctrine.orm.dialog_entity_manager'
+
     # Commands
     App\Command\WebSocket\WebSocketServerCommand:
         arguments:

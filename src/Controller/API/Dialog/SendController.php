@@ -3,6 +3,7 @@
 namespace App\Controller\API\Dialog;
 
 use App\DTO\Dialog\Request\SendRequest;
+use App\DTO\Dialog\Response\SendResponse;
 use App\Service\ApiJsonResponse;
 use App\Service\Dialog\DialogInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,13 +19,12 @@ class SendController
         $this->dialog = $dialog;
     }
 
-    #[Route('/dialog/{user_id}/send', name: 'api_dialog_send', methods: ['POST'])]
+    #[Route('/dialog/{chat_id}/send', name: 'api_dialog_send', methods: ['POST'])]
     public function __invoke(UserInterface $user, SendRequest $sendRequest): JsonResponse
     {
-        $sendRequest->fromUserId = $user->getId();
+        $chat = $this->dialog->getChatById($sendRequest->chatId);
+        $message = $this->dialog->sendMessage($chat, $user->getId(), $sendRequest->test);
 
-        $this->dialog->sendMessage($sendRequest);
-
-        return ApiJsonResponse::create();
+        return ApiJsonResponse::create(SendResponse::createFromMessage($message));
     }
 }
