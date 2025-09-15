@@ -136,9 +136,9 @@ class ShardManager
 
         // Старая стратегия
         if (!$boundary || $chatId < $boundary) {
-            $shard = $this->getShardByChatId($chatId);
+            $shard = $this->getShardByChatId($chatId, self::DIALOG_OLD_SHARDS_COUNT);
 
-            if (!$this->isShardMigrated($shard, self::DIALOG_OLD_SHARDS_COUNT)) {
+            if (!$this->isShardMigrated($shard)) {
                 return $this->getOldShardEntityManager($shard);
             }
         }
@@ -190,9 +190,9 @@ class ShardManager
 //
 //        // Старая стратегия
 //        if (!$boundary || $chatId < $boundary) {
-//            $shard = $this->getShardByChatId($chatId);
+//            $shard = $this->getShardByChatId($chatId, self::DIALOG_OLD_SHARDS_COUNT);
 //
-//            if (!$this->isShardMigrated($shard, self::DIALOG_OLD_SHARDS_COUNT)) {
+//            if (!$this->isShardMigrated($shard)) {
 //                return $this->getOldShardEntityManager($shard);
 //            }
 //        }
