@@ -65,6 +65,14 @@ docker-compose exec php bin/console cache:pool:clear cache.app
 
 После этого локально проект будет доступен по адресу http://127.0.0.1:8089/
 
+### Шардирование БД диалогов
+
+Для установки границы записи новых чатов в новые шарды выполните команду
+
+```bash
+docker-compose exec php bin/console app:dialog:reshard:set-boundary
+```
+
 ### Запуск WebSocket сервера
 
 Для ручного запуска сервера выполните команду

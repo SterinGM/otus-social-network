@@ -10,7 +10,7 @@ use Symfony\Component\Uid\UuidV7;
 
 class ShardManager
 {
-    const string DIALOG_SHARD_MIGRATION_BOUNDARY = 'dialog_shard_migration_boundary';
+    public const string DIALOG_SHARD_MIGRATION_BOUNDARY = 'dialog_shard_migration_boundary';
 
     private Redis $redis;
     private EntityManagerInterface $em;
@@ -38,7 +38,7 @@ class ShardManager
 
         if (!$boundary || $chatId < $boundary) {
             // Старая стратегия
-            $shardKey = UuidV7::fromString($chatId)->getDateTime()->format('u');
+            $shardKey = $this->getShardKeyByChatId($chatId);
             $shard = $shardKey % 1; // 1 шард
 
             return match ($shard) {
@@ -48,7 +48,7 @@ class ShardManager
         }
 
         // Новая стратегия
-        $shardKey = UuidV7::fromString($chatId)->getDateTime()->format('u');
+        $shardKey = $this->getShardKeyByChatId($chatId);
         $shard = $shardKey % 2; // 2 шарда
 
         return match ($shard) {
@@ -67,5 +67,10 @@ class ShardManager
         }
 
         return (string)$value;
+    }
+
+    public function getShardKeyByChatId(string $chatId): string
+    {
+        return (string)(UuidV7::fromString($chatId)->getDateTime()->format('Uu') / 1000);
     }
 }
