@@ -5,6 +5,7 @@ namespace App\Repository\Dialog;
 use App\Entity\Dialog\Chat;
 use App\Service\Dialog\ShardManager;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -37,15 +38,25 @@ class ChatRepository extends ServiceEntityRepository
         return $this->mapChat($result->fetchAssociative());
     }
 
-    public function createChat(Chat $chat): void
+    public function createChat(Chat $chat, ?EntityManagerInterface $entityManager = null): void
     {
         $sql = 'INSERT INTO chat(id, user_ids) VALUES(:id, :user_ids)';
 
-        $em = $this->shardManager->getEntityManagerForChat($chat->getId());
+        $em = $entityManager ?? $this->shardManager->getEntityManagerForChat($chat->getId());
         $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('id', $chat->getId());
         $statement->bindValue('user_ids', json_encode($chat->getUserIds()));
         $statement->executeStatement();
+    }
+
+    public function getAllChats(EntityManagerInterface $em): array
+    {
+        $sql = 'SELECT * FROM chat';
+
+        $statement = $em->getConnection()->prepare($sql);
+        $result = $statement->executeQuery();
+
+        return $this->mapChatList($result->fetchAllAssociative());
     }
 
     private function mapChat(array $data): Chat
@@ -53,5 +64,21 @@ class ChatRepository extends ServiceEntityRepository
         return new Chat()
             ->setId($data['id'])
             ->setUserIds(json_decode($data['user_ids']));
+    }
+
+    /**
+     * @return Chat[]
+     */
+    private function mapChatList(array $list): array
+    {
+        $result = [];
+
+        foreach ($list as $data) {
+            $chat = $this->mapChat($data);
+
+            $result[$chat->getId()] = $chat;
+        }
+
+        return $result;
     }
 }

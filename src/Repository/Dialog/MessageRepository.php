@@ -7,6 +7,7 @@ use App\Entity\Dialog\Message;
 use App\Service\Dialog\ShardManager;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -25,12 +26,12 @@ class MessageRepository extends ServiceEntityRepository
         $this->shardManager = $shardManager;
     }
 
-    public function createMessage(Message $message): void
+    public function createMessage(Message $message, ?EntityManagerInterface $entityManager = null): void
     {
         $sql = 'INSERT INTO message(id, chat_id, content, user_id, created_at)
             VALUES(:id, :chat_id, :content, :user_id, :created_at)';
 
-        $em = $this->shardManager->getEntityManagerForChat($message->getChat()->getId());
+        $em = $entityManager ?? $this->shardManager->getEntityManagerForChat($message->getChat()->getId());
         $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('id', $message->getId());
         $statement->bindValue('chat_id', $message->getChat()->getId());
@@ -70,9 +71,9 @@ class MessageRepository extends ServiceEntityRepository
         $result = [];
 
         foreach ($list as $data) {
-            $post = $this->mapMessage($chat, $data);
+            $message = $this->mapMessage($chat, $data);
 
-            $result[$post->getId()] = $post;
+            $result[$message->getId()] = $message;
         }
 
         return $result;

@@ -36,26 +36,17 @@ class ShardManager
     {
         $boundary = $this->getShardingBoundary();
 
+        // Старая стратегия
         if (!$boundary || $chatId < $boundary) {
-            // Старая стратегия
-            $shardKey = $this->getShardKeyByChatId($chatId);
-            $shard = $shardKey % 1; // 1 шард
+            $shard = $this->getShardByChatId($chatId);
 
-            return match ($shard) {
-                0 => $this->em,
-                default => throw new InvalidArgumentException('Unknown old shard')
-            };
+            return $this->getOldShardEntityManager($shard);
         }
 
         // Новая стратегия
-        $shardKey = $this->getShardKeyByChatId($chatId);
-        $shard = $shardKey % 2; // 2 шарда
+        $shard = $this->getShardByChatId($chatId, 2);
 
-        return match ($shard) {
-            0 => $this->emShard0,
-            1 => $this->emShard1,
-            default => throw new InvalidArgumentException('Unknown shard')
-        };
+        return $this->getNewShardEntityManager($shard);
     }
 
     private function getShardingBoundary(): ?string
@@ -69,8 +60,27 @@ class ShardManager
         return (string)$value;
     }
 
-    public function getShardKeyByChatId(string $chatId): string
+    public function getShardByChatId(string $chatId, int $shardCount = 1): string
     {
-        return (string)(UuidV7::fromString($chatId)->getDateTime()->format('Uu') / 1000);
+        $shardKey = (string)(UuidV7::fromString($chatId)->getDateTime()->format('Uu') / 1000);
+
+        return $shardKey % $shardCount;
+    }
+
+    public function getOldShardEntityManager(int $shard): EntityManagerInterface
+    {
+        return match ($shard) {
+            0 => $this->em,
+            default => throw new InvalidArgumentException('Unknown old shard')
+        };
+    }
+
+    public function getNewShardEntityManager(int $shard): EntityManagerInterface
+    {
+        return match ($shard) {
+            0 => $this->emShard0,
+            1 => $this->emShard1,
+            default => throw new InvalidArgumentException('Unknown shard')
+        };
     }
 }

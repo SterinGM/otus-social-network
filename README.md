@@ -73,6 +73,13 @@ docker-compose exec php bin/console cache:pool:clear cache.app
 docker-compose exec php bin/console app:dialog:reshard:set-boundary
 ```
 
+Данные мигрируют строго по одному шарду  
+Для запуска миграции в новые шарды выполните команду указав номер шарда и количество новых шардов 0, 1, 2 и тд.
+
+```bash
+docker-compose exec php bin/console app:dialog:reshard:migrate-shard 0 2
+```
+
 ### Запуск WebSocket сервера
 
 Для ручного запуска сервера выполните команду
