@@ -80,6 +80,12 @@ docker-compose exec php bin/console app:dialog:reshard:set-boundary
 docker-compose exec php bin/console app:dialog:reshard:migrate-shard 0 2
 ```
 
+Для удаления границы решардинга выполните команду указав количество старых шардов 1, 2 и тд.
+
+```bash
+docker-compose exec php bin/console app:dialog:reshard:finish 1
+```
+
 ### Запуск WebSocket сервера
 
 Для ручного запуска сервера выполните команду

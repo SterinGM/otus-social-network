@@ -5,15 +5,16 @@ namespace App\Command\Dialog;
 use App\Service\Dialog\ShardManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:dialog:reshard:set-boundary',
-    description: 'Установить начальный ID чата для миграции в новые шарды.',
+    name: 'app:dialog:reshard:finish',
+    description: 'Удалить границу решардинга. Теперь всё пишется и читается из новых шардов.',
 )]
-class DialogReshardingSetBoundaryCommand extends Command
+class DialogReshardingFinishCommand extends Command
 {
     private ShardManager $shardManager;
 
@@ -24,13 +25,20 @@ class DialogReshardingSetBoundaryCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addArgument('count-shards', InputArgument::REQUIRED, 'Количество старых шардов');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $newMaxChatId = $this->shardManager->setShardingBoundary();
+        $countShards = (int)$input->getArgument('count-shards');
 
-        $io->success("Граница миграции установлена: chat_id > $newMaxChatId");
+        $this->shardManager->clearShardingCache($countShards);
+
+        $io->success("Граница миграции успешно удалена");
 
         return Command::SUCCESS;
     }

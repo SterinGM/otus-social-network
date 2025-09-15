@@ -36,16 +36,16 @@ class ShardManager
 
     public function getEntityManagerForChat(string $chatId): EntityManagerInterface
     {
-        $boundary = $this->getShardingBoundary();
-
-        // Старая стратегия
-        if (!$boundary || $chatId < $boundary) {
-            $shard = $this->getShardByChatId($chatId);
-
-            if (!$this->isShardMigrated($shard)) {
-                return $this->getOldShardEntityManager($shard);
-            }
-        }
+//        $boundary = $this->getShardingBoundary();
+//
+//        // Старая стратегия
+//        if (!$boundary || $chatId < $boundary) {
+//            $shard = $this->getShardByChatId($chatId);
+//
+//            if (!$this->isShardMigrated($shard)) {
+//                return $this->getOldShardEntityManager($shard);
+//            }
+//        }
 
         // Новая стратегия
         $shard = $this->getShardByChatId($chatId, 2);
@@ -100,6 +100,17 @@ class ShardManager
         }
 
         return (string)$value;
+    }
+
+    public function clearShardingCache(int $countShards): void
+    {
+        $this->redis->del(self::DIALOG_SHARD_MIGRATION_BOUNDARY);
+
+        for ($i = 0; $i < $countShards; $i++) {
+            $key = $this->getKey($i);
+
+            $this->redis->del($key);
+        }
     }
 
     public function setShardingBoundary(): string

@@ -22,8 +22,6 @@ use Symfony\Component\Uid\Uuid;
 )]
 class DialogReshardingMigrateShardCommand extends Command
 {
-    protected static $defaultName = 'app:dialog:reshard:migrate-shard';
-
     private ShardManager $shardManager;
     private ChatRepository $chatRepository;
     private MessageRepository $messageRepository;
