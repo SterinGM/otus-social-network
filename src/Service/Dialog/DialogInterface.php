@@ -7,6 +7,11 @@ use App\Entity\Dialog\Message;
 
 interface DialogInterface
 {
+    /**
+     * @param string[] $userIds
+     */
+    public function createChat(array $userIds): Chat;
+
     public function getChatById(string $chatId): Chat;
 
     public function sendMessage(Chat $chat, string $userId, string $text): Message;

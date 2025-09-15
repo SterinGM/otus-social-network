@@ -39,14 +39,11 @@ class ChatRepository extends ServiceEntityRepository
 
     public function createChat(Chat $chat): void
     {
-        $userIds = array_unique($chat->getUserIds());
-        sort($userIds);
-
         $sql = 'INSERT INTO chat(id, user_ids) VALUES(:id, :user_ids)';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue('id', $chat->getId());
-        $statement->bindValue('user_ids', json_encode($userIds));
+        $statement->bindValue('user_ids', json_encode($chat->getUserIds()));
         $statement->executeStatement();
     }
 

@@ -27,6 +27,25 @@ class Dialog implements DialogInterface
         $this->messageRepository = $messageRepository;
     }
 
+    public function createChat(array $userIds): Chat
+    {
+        $userIds = array_unique($userIds);
+
+        foreach ($userIds as $userId) {
+            $user = $this->userRepository->getById($userId);
+
+            if ($user === null) {
+                throw new UserNotFoundException($userId);
+            }
+        }
+
+        $chat = $this->buildChat($userIds);
+
+        $this->chatRepository->createChat($chat);
+
+        return $chat;
+    }
+
     public function getChatById(string $chatId): Chat
     {
         $chat = $this->chatRepository->getChatById($chatId);
@@ -52,21 +71,6 @@ class Dialog implements DialogInterface
         return $this->messageRepository->getMessages($chat);
     }
 
-    private function getOrCreateChat(string $userId1, string $userId2): Chat
-    {
-        $chat = $this->chatRepository->getChatByUsers($userId1, $userId2);
-
-        if ($chat == null) {
-            $chat = new Chat()
-                ->setId(Uuid::v7()->toRfc4122())
-                ->setUserIds([$userId1, $userId2]);
-
-            $this->chatRepository->createChat($chat);
-        }
-
-        return $chat;
-    }
-
     public function buildMessage(Chat $chat, string $userId, string $text): Message
     {
         return new Message()
@@ -74,5 +78,15 @@ class Dialog implements DialogInterface
             ->setChat($chat)
             ->setContent($text)
             ->setUserId($userId);
+    }
+
+    /**
+     * @param string[] $userIds
+     */
+    public function buildChat(array $userIds): Chat
+    {
+        return new Chat()
+            ->setId(Uuid::v7()->toRfc4122())
+            ->setUserIds($userIds);
     }
 }
