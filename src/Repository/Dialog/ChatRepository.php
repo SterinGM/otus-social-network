@@ -49,6 +49,9 @@ class ChatRepository extends ServiceEntityRepository
         $statement->executeStatement();
     }
 
+    /**
+     * @return Chat[]
+     */
     public function getAllChats(EntityManagerInterface $em): array
     {
         $sql = 'SELECT * FROM chat';

@@ -41,13 +41,32 @@ class MessageRepository extends ServiceEntityRepository
         $statement->executeStatement();
     }
 
-    public function getMessages(Chat $chat)
+    /**
+     * @return Message[]
+     */
+    public function getAllMessages(Chat $chat): array
     {
         $sql = 'SELECT * FROM message WHERE chat_id = :chat_id ORDER BY id DESC';
 
         $em = $this->shardManager->getEntityManagerForChat($chat->getId());
         $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('chat_id', $chat->getId());
+        $result = $statement->executeQuery();
+
+        return $this->mapList($chat, $result->fetchAllAssociative());
+    }
+
+    /**
+     * @return Message[]
+     */
+    public function getMessagesFromId(Chat $chat, string $fromMessageId, ?EntityManagerInterface $entityManager = null): array
+    {
+        $sql = 'SELECT * FROM message WHERE chat_id = :chat_id AND id >= :message_id ORDER BY id DESC';
+
+        $em = $entityManager ?? $this->shardManager->getEntityManagerForChat($chat->getId());
+        $statement = $em->getConnection()->prepare($sql);
+        $statement->bindValue('chat_id', $chat->getId());
+        $statement->bindValue('message_id', $fromMessageId);
         $result = $statement->executeQuery();
 
         return $this->mapList($chat, $result->fetchAllAssociative());

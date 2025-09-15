@@ -80,7 +80,7 @@ class Dialog implements DialogInterface
             throw new ChatNotFoundException($chat->getId());
         }
 
-        return $this->messageRepository->getMessages($chat);
+        return $this->messageRepository->getAllMessages($chat);
     }
 
     public function buildMessage(Chat $chat, string $userId, string $text): Message
