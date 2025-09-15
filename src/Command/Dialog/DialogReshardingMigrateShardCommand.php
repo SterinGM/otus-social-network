@@ -65,17 +65,18 @@ class DialogReshardingMigrateShardCommand extends Command
         $n = 0;
 
         foreach ($chats as $chat) {
-            $chatId = $chat->getId();
-
-            $shard = $this->shardManager->getShardByChatId($chatId, $countShards);
+            $shard = $this->shardManager->getShardByChatId($chat->getId(), $countShards);
             $newEm = $this->shardManager->getNewShardEntityManager($shard);
 
-            $this->chatRepository->createChat($chat, $newEm);
+            try {
+                $this->chatRepository->createChat($chat, $newEm);
 
-            $messages = $this->messageRepository->getMessages($chat);
-
-            foreach ($messages as $message) {
-                $this->messageRepository->createMessage($message, $newEm);
+                $messages = $this->messageRepository->getMessages($chat);
+                foreach ($messages as $message) {
+                    $this->messageRepository->createMessage($message, $newEm);
+                }
+            } catch (Exception) {
+                $io->warning("Чат {$chat->getId()} уже мигрировал");
             }
 
             $newEm->flush();
