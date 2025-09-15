@@ -29,13 +29,12 @@ services:
         arguments:
             $feed: '@App\Service\Post\Feed'
 
-    App\Repository\Dialog\ChatRepository:
+    App\Service\Dialog\ShardManager:
         arguments:
-            $entityManager: '@doctrine.orm.dialog_entity_manager'
-
-    App\Repository\Dialog\MessageRepository:
-        arguments:
-            $entityManager: '@doctrine.orm.dialog_entity_manager'
+            $host: 'redis://%env(resolve:REDIS_HOST)%'
+            $em: '@doctrine.orm.dialog_entity_manager'
+            $emShard0: '@doctrine.orm.dialog_0_entity_manager'
+            $emShard1: '@doctrine.orm.dialog_1_entity_manager'
 
     # Commands
     App\Command\WebSocket\WebSocketServerCommand:

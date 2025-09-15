@@ -4,10 +4,9 @@ namespace App\Repository\Dialog;
 
 use App\Entity\Dialog\Chat;
 use App\Entity\Dialog\Message;
+use App\Service\Dialog\ShardManager;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -17,13 +16,13 @@ class MessageRepository extends ServiceEntityRepository
 {
     private const string DATE_FORMAT = 'Y-m-d H:i:s';
 
-    private Connection $connection;
+    private ShardManager $shardManager;
 
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
+    public function __construct(ManagerRegistry $registry, ShardManager $shardManager)
     {
         parent::__construct($registry, Message::class);
 
-        $this->connection = $entityManager->getConnection();
+        $this->shardManager = $shardManager;
     }
 
     public function createMessage(Message $message): void
@@ -31,7 +30,8 @@ class MessageRepository extends ServiceEntityRepository
         $sql = 'INSERT INTO message(id, chat_id, content, user_id, created_at)
             VALUES(:id, :chat_id, :content, :user_id, :created_at)';
 
-        $statement = $this->connection->prepare($sql);
+        $em = $this->shardManager->getEntityManagerForChat($message->getChat()->getId());
+        $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('id', $message->getId());
         $statement->bindValue('chat_id', $message->getChat()->getId());
         $statement->bindValue('content', $message->getContent());
@@ -44,7 +44,8 @@ class MessageRepository extends ServiceEntityRepository
     {
         $sql = 'SELECT * FROM message WHERE chat_id = :chat_id ORDER BY id DESC';
 
-        $statement = $this->connection->prepare($sql);
+        $em = $this->shardManager->getEntityManagerForChat($chat->getId());
+        $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('chat_id', $chat->getId());
         $result = $statement->executeQuery();
 

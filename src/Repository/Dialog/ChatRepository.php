@@ -3,9 +3,8 @@
 namespace App\Repository\Dialog;
 
 use App\Entity\Dialog\Chat;
+use App\Service\Dialog\ShardManager;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -13,20 +12,21 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ChatRepository extends ServiceEntityRepository
 {
-    private Connection $connection;
+    private ShardManager $shardManager;
 
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
+    public function __construct(ManagerRegistry $registry, ShardManager $shardManager)
     {
         parent::__construct($registry, Chat::class);
 
-        $this->connection = $entityManager->getConnection();
+        $this->shardManager = $shardManager;
     }
 
     public function getChatById(string $chatId): ?Chat
     {
         $sql = 'SELECT * FROM chat WHERE id = :chatId';
 
-        $statement = $this->connection->prepare($sql);
+        $em = $this->shardManager->getEntityManagerForChat($chatId);
+        $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('chatId', $chatId);
         $result = $statement->executeQuery();
 
@@ -41,7 +41,8 @@ class ChatRepository extends ServiceEntityRepository
     {
         $sql = 'INSERT INTO chat(id, user_ids) VALUES(:id, :user_ids)';
 
-        $statement = $this->connection->prepare($sql);
+        $em = $this->shardManager->getEntityManagerForChat($chat->getId());
+        $statement = $em->getConnection()->prepare($sql);
         $statement->bindValue('id', $chat->getId());
         $statement->bindValue('user_ids', json_encode($chat->getUserIds()));
         $statement->executeStatement();
