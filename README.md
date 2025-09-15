@@ -5,7 +5,7 @@
 * Создайте файл _.env.local_ в корне проекта
 * Пропишите в этом файле параметры из _.env_
   * **MYSQL_ROOT_PASSWORD**
-  * **DATABASE_URL**
+  * **DATABASE_URL_***
   * **AMQP_PASSWORD**
   * **MESSENGER_TRANSPORT_DSN**
 * Поменяйте пароли для своей рабочей копии
@@ -31,13 +31,25 @@ docker-compose exec php bin/console doctrine:database:create --if-not-exists -c 
 ```bash
 docker-compose exec php bin/console doctrine:database:create --if-not-exists -c dialog
 ```
+```bash
+docker-compose exec php bin/console doctrine:database:create --if-not-exists -c dialog_0
+```
+```bash
+docker-compose exec php bin/console doctrine:database:create --if-not-exists -c dialog_1
+```
 Для применения миграций выполните команду
 
 ```bash
-docker-compose exec php bin/console doctrine:migration:migrate -n --em=main --configuration=config/migrations/main.yaml
+docker-compose exec php bin/console doctrine:migration:migrate -n --configuration=config/migrations/main.yaml --em=main
 ```
 ```bash
-docker-compose exec php bin/console doctrine:migration:migrate -n --em=dialog --configuration=config/migrations/dialog.yaml
+docker-compose exec php bin/console doctrine:migration:migrate -n --configuration=config/migrations/dialog.yaml --em=dialog
+```
+```bash
+docker-compose exec php bin/console doctrine:migration:migrate -n --configuration=config/migrations/dialog.yaml --em=dialog_0
+```
+```bash
+docker-compose exec php bin/console doctrine:migration:migrate -n --configuration=config/migrations/dialog.yaml --em=dialog_1
 ```
 Если вам нужны тестовые данные для разработки, то можно загрузить фикстуры  
 Процесс генерации занимает значительное время
