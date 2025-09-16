@@ -11,28 +11,35 @@
 
 Необходимо отредактировать след конфиги примерно так, как показано ниже  
 Старые параметры пока что удалять не надо
+
+Добавьте новые шарды
 ```
 # .env 
 
-# добавьте новые шарды
 MYSQL_DATABASE_DIALOG_0=socnet_dialog_0
 MYSQL_DATABASE_DIALOG_1=socnet_dialog_1
+```
 
-# добавьте новые урлы для подключения к шардам
+Добавьте новые урлы для подключения к шардам
+```
+# .env 
+
 DATABASE_URL_DIALOG_0="mysql://${MYSQL_USER}:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE_DIALOG_0}?serverVersion=${SERVER_VERSION}"
 DATABASE_URL_DIALOG_1="mysql://${MYSQL_USER}:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE_DIALOG_1}?serverVersion=${SERVER_VERSION}"
 ```
+
+Скопируйте урлы подключения, чтобы указать реальные параметры подключения
 ```
 # .env.local
 
-# скопируйте урлы подключения, чтобы указать реальные параметры подключения
 DATABASE_URL_DIALOG_0="mysql://${MYSQL_USER}:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE_DIALOG_0}?serverVersion=${SERVER_VERSION}"
 DATABASE_URL_DIALOG_1="mysql://${MYSQL_USER}:${MYSQL_ROOT_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE_DIALOG_1}?serverVersion=${SERVER_VERSION}"
 ```
+
+Добавьте новые подключения шардам
 ```yaml
 # config/packages/doctrine.yaml
 
-# добавьте новые шарды 
 doctrine:
   dbal:
     connections:
@@ -47,7 +54,14 @@ doctrine:
         driver: 'pdo_mysql'
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+```
 
+Добавьте новые менеджеры сущностей
+```yaml
+# config/packages/doctrine.yaml
+
+doctrine:
+  dbal:
     orm:
       entity_managers:
         # ...
@@ -98,18 +112,22 @@ docker-compose exec php bin/console doctrine:migration:migrate -n --configuratio
 
 ### Подготовка кода приложения
 
-Отредактируйте след файлы
+Установите соответствующие значения количества шардов
 ```php
 // src/Service/Dialog/ShardManager.php
 
-// добавьте тут новые шарды
-// старые удалять не надо
 class ShardManager
 {
-    // установите соответствующие значения количества шардов
     public const int DIALOG_OLD_SHARDS_COUNT = 1;
     public const int DIALOG_NEW_SHARDS_COUNT = 2;
+```
 
+Добавьте новые шарды. Старые удалять не надо
+```php
+// src/Service/Dialog/ShardManager.php
+
+class ShardManager
+{
     // ...
     private EntityManagerInterface $emShard0;
     private EntityManagerInterface $emShard1;
@@ -124,10 +142,11 @@ class ShardManager
         $this->emShard1 = $emShard1;
     }
 ```
+
+Раскомментируйте логику на время миграции данных
 ```php
 // src/Service/Dialog/ShardManager.php
 
-// раскомментируйте логику на время миграции данных
 class ShardManager
 {
     public function getEntityManagerForChat(string $chatId): EntityManagerInterface
@@ -149,15 +168,42 @@ class ShardManager
         return $this->getNewShardEntityManager($shard);
     }
 ```
+
+Отредактируйте логику выбора новых и старых шардов
+```php
+// src/Service/Dialog/ShardManager.php
+
+class ShardManager
+{
+    public function getOldShardEntityManager(int $shard): EntityManagerInterface
+    {
+        return match ($shard) {
+            0 => $this->em,
+            default => throw new InvalidArgumentException('Unknown old shard')
+        };
+    }
+
+    public function getNewShardEntityManager(int $shard): EntityManagerInterface
+    {
+        return match ($shard) {
+            0 => $this->emShard0,
+            1 => $this->emShard1,
+            default => throw new InvalidArgumentException('Unknown shard')
+        };
+    }
+```
+
+Укажите значения для параметров конструктора класса ShardManager
 ```yaml
 # config/services.yaml
 
-# укажите значения для параметров конструктора класса ShardManager
-App\Service\Dialog\ShardManager:
-  arguments:
+services:
     # ...
-    $emShard0: '@doctrine.orm.dialog_0_entity_manager'
-    $emShard1: '@doctrine.orm.dialog_1_entity_manager'
+    App\Service\Dialog\ShardManager:
+      arguments:
+        # ...
+        $emShard0: '@doctrine.orm.dialog_0_entity_manager'
+        $emShard1: '@doctrine.orm.dialog_1_entity_manager'
 ```
 
 ### Выполнения процесса решардинга
@@ -177,11 +223,10 @@ docker-compose exec php bin/console app:dialog:reshard:migrate-shard 0
 
 ### Переключение на новую логику
 
-Отредактируйте след файлы
+Закомментируйте логику после миграции данных
 ```php
 // src/Service/Dialog/ShardManager.php
 
-// закомментируйте логику после миграции данных
 class ShardManager
 {
     public function getEntityManagerForChat(string $chatId): EntityManagerInterface
@@ -205,10 +250,10 @@ class ShardManager
 ```
 
 Для удаления границы решардинга выполните команду
-
 ```bash
 docker-compose exec php bin/console app:dialog:reshard:finish
 ```
 
+---
 Теперь неиспользуемые шарды можно убрать из конфигов и потом удалить физически  
 Но это делать не обязательно
