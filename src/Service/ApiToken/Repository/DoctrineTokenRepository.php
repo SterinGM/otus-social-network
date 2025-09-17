@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Service\ApiToken;
+namespace App\Service\ApiToken\Repository;
 
 use App\Entity\Main\ApiToken;
 use App\Repository\Main\ApiTokenRepository;
 use App\Service\ApiToken\Object\Token;
+use App\Service\ApiToken\TokenRepositoryInterface;
 use App\Service\Exception\InvalidCredentialsException;
 
 class DoctrineTokenRepository implements TokenRepositoryInterface

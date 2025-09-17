@@ -40,6 +40,15 @@ services:
         arguments:
             $apiLogLogic: '%env(resolve:APP_CONFIG_API_LOG_LOGIC)%'
 
+    App\Service\ApiToken\TokenRepositoryFactory:
+        arguments:
+            $doctrineTokenRepository: '@App\Service\ApiToken\Repository\DoctrineTokenRepository'
+            $redisTokenRepository: '@App\Service\ApiToken\Repository\RedisTokenRepository'
+
+    App\Service\ApiToken\Repository\RedisTokenRepository:
+        arguments:
+            $host: 'redis://%env(resolve:REDIS_HOST)%'
+
     App\WebSocket\Consumer\PostConsumer:
         arguments:
             $dsn: '%env(resolve:MESSENGER_TRANSPORT_DSN)%'

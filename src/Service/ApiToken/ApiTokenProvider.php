@@ -7,11 +7,12 @@ use Symfony\Component\Uid\Uuid;
 
 class ApiTokenProvider implements ApiTokenProviderInterface
 {
-    private TokenRepositoryInterface $doctrineTokenRepository;
+    private TokenRepositoryInterface $tokenRepository;
 
-    public function __construct(TokenRepositoryInterface $doctrineTokenRepository)
-    {
-        $this->doctrineTokenRepository = $doctrineTokenRepository;
+    public function __construct(
+        TokenRepositoryFactory $tokenRepositoryFactory
+    ) {
+        $this->tokenRepository = $tokenRepositoryFactory->getRepository();
     }
 
     public function generateToken(string $userId): Token
@@ -21,14 +22,14 @@ class ApiTokenProvider implements ApiTokenProviderInterface
             $userId
         );
 
-        $this->doctrineTokenRepository->save($token);
+        $this->tokenRepository->save($token);
 
         return $token;
     }
 
     public function getToken(string $token): Token
     {
-        return $this->doctrineTokenRepository->getByToken($token);
+        return $this->tokenRepository->getByToken($token);
     }
 
     private function newToken(): string    {
