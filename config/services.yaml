@@ -36,6 +36,10 @@ services:
             $emShard0: '@doctrine.orm.dialog_0_entity_manager'
             $emShard1: '@doctrine.orm.dialog_1_entity_manager'
 
+    App\Service\Config\Config:
+        arguments:
+            $apiLogLogic: '%env(resolve:APP_CONFIG_API_LOG_LOGIC)%'
+
     App\WebSocket\Consumer\PostConsumer:
         arguments:
             $dsn: '%env(resolve:MESSENGER_TRANSPORT_DSN)%'

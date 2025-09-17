@@ -4,6 +4,7 @@ namespace App\Service\ApiLogger;
 
 use App\Entity\Main\ApiLog;
 use App\Repository\Main\ApiLogRepository;
+use App\Service\Config\ConfigInterface;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Uid\Uuid;
@@ -11,14 +12,20 @@ use Symfony\Component\Uid\Uuid;
 class ApiLogger implements ApiLoggerInterface
 {
     private ApiLogRepository $apiLogRepository;
+    private ConfigInterface $config;
 
-    public function __construct(ApiLogRepository $apiLogRepository)
+    public function __construct(ApiLogRepository $apiLogRepository, ConfigInterface $config)
     {
         $this->apiLogRepository = $apiLogRepository;
+        $this->config = $config;
     }
 
     public function log(ApiData $data): void
     {
+        if (!$this->config->isEnabled(ConfigInterface::API_LOG_LOGIC)) {
+            return;
+        }
+
         $log = $this->mapLog($data);
 
         $this->apiLogRepository->save($log);
