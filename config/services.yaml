@@ -39,6 +39,16 @@ services:
     App\Service\Config\Config:
         arguments:
             $apiLogLogic: '%env(resolve:APP_CONFIG_API_LOG_LOGIC)%'
+            $authTokenSchema: '%env(resolve:APP_CONFIG_AUTH_TOKEN_SCHEMA)%'
+
+    App\Service\ApiToken\TokenRepositoryFactory:
+        arguments:
+            $doctrineTokenRepository: '@App\Service\ApiToken\Repository\DoctrineTokenRepository'
+            $redisTokenRepository: '@App\Service\ApiToken\Repository\RedisTokenRepository'
+
+    App\Service\ApiToken\Repository\RedisTokenRepository:
+        arguments:
+            $host: 'redis://%env(resolve:REDIS_HOST)%'
 
     App\WebSocket\Consumer\PostConsumer:
         arguments:

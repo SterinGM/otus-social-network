@@ -2,25 +2,25 @@
 
 namespace App\WebSocket\Handler;
 
+use App\Service\ApiToken\ApiTokenProviderInterface;
 use Ratchet\ConnectionInterface;
 use App\WebSocket\Storage\WebSocketStorage;
-use App\Service\Security\ApiTokenHandler;
 use Psr\Log\LoggerInterface;
 use InvalidArgumentException;
 
 class AuthenticationHandler
 {
     private WebSocketStorage $storage;
-    private ApiTokenHandler $apiTokenHandler;
+    private ApiTokenProviderInterface $apiTokenProvider;
     private LoggerInterface $logger;
 
     public function __construct(
         WebSocketStorage $storage,
-        ApiTokenHandler $apiTokenHandler,
+        ApiTokenProviderInterface $apiTokenProvider,
         LoggerInterface $logger
     ) {
         $this->storage = $storage;
-        $this->apiTokenHandler = $apiTokenHandler;
+        $this->apiTokenProvider = $apiTokenProvider;
         $this->logger = $logger;
     }
 
@@ -30,7 +30,7 @@ class AuthenticationHandler
             throw new InvalidArgumentException('Требуется токен авторизации');
         }
 
-        $userId = $this->apiTokenHandler->getUserBadgeFrom($data['user_token'])->getUserIdentifier();
+        $userId = $this->apiTokenProvider->getToken($data['user_token'])->userId;
         $conn->userId = $userId;
 
         $this->storage->addUserConnection($userId, $conn);

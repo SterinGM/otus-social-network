@@ -2,7 +2,7 @@
 
 namespace App\DTO\Auth\Response;
 
-use App\Entity\Main\ApiToken;
+use App\Service\ApiToken\Object\Token;
 
 class LoginResponse
 {
@@ -13,10 +13,10 @@ class LoginResponse
         $this->token = $token;
     }
 
-    public static function createFromApiToken(ApiToken $apiToken): self
+    public static function createFromApiToken(Token $apiToken): self
     {
         return new self(
-            $apiToken->getToken(),
+            $apiToken->token,
         );
     }
 }
