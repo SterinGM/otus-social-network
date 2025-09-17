@@ -39,6 +39,7 @@ services:
     App\Service\Config\Config:
         arguments:
             $apiLogLogic: '%env(resolve:APP_CONFIG_API_LOG_LOGIC)%'
+            $authTokenSchema: '%env(resolve:APP_CONFIG_AUTH_TOKEN_SCHEMA)%'
 
     App\Service\ApiToken\TokenRepositoryFactory:
         arguments:
