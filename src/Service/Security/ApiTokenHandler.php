@@ -2,28 +2,29 @@
 
 namespace App\Service\Security;
 
-use App\Repository\Main\ApiTokenRepository;
+use App\Service\ApiToken\ApiTokenProviderInterface;
+use App\Service\Exception\InvalidCredentialsException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\AccessToken\AccessTokenHandlerInterface;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 
 class ApiTokenHandler implements AccessTokenHandlerInterface
 {
-    private ApiTokenRepository $repository;
+    private ApiTokenProviderInterface $apiTokenProvider;
 
-    public function __construct(ApiTokenRepository $repository)
+    public function __construct(ApiTokenProviderInterface $apiTokenProvider)
     {
-        $this->repository = $repository;
+        $this->apiTokenProvider = $apiTokenProvider;
     }
 
     public function getUserBadgeFrom(string $accessToken): UserBadge
     {
-        $apiToken = $this->repository->getByToken($accessToken);
-
-        if (!$apiToken) {
+        try {
+            $token = $this->apiTokenProvider->getToken($accessToken);
+        } catch (InvalidCredentialsException) {
             throw new BadCredentialsException('Invalid API token');
         }
 
-        return new UserBadge($apiToken->getUserId());
+        return new UserBadge($token->userId);
     }
 }
