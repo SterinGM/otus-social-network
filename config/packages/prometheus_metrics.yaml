@@ -1,6 +1,8 @@
 artprima_prometheus_metrics:
     namespace: socnet
-    storage: '%env(PROM_METRICS_DSN)%'
+    storage:
+        url: 'redis://%env(resolve:REDIS_HOST)%'
+        type: redis
 
     ignored_routes:
         - prometheus_bundle_prometheus
