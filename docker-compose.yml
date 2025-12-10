@@ -85,6 +85,30 @@ services:
         networks:
             - app_network
 
+    prometheus:
+        container_name: socnet-prometheus
+        image: prom/prometheus:latest
+        volumes:
+            - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+        ports:
+            - '9190:9090'
+        networks:
+            - app_network
+
+    grafana:
+        container_name: socnet-grafana
+        image: grafana/grafana:latest
+        ports:
+            - "3100:3000" # Expose Grafana web interface
+        volumes:
+            - ./var/lib/grafana_data:/var/lib/grafana
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=admin # Set initial admin password
+        networks:
+            - app_network
+
 networks:
     app_network:
         driver: bridge
