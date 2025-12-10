@@ -93,7 +93,7 @@ services:
         command:
             - '--config.file=/etc/prometheus/prometheus.yml'
         ports:
-            - '9190:9090'
+            - 127.0.0.1:9190:9090
         networks:
             - app_network
 
@@ -101,7 +101,7 @@ services:
         container_name: socnet-grafana
         image: grafana/grafana:latest
         ports:
-            - "3100:3000" # Expose Grafana web interface
+            - 127.0.0.1:3100:3000 # Expose Grafana web interface
         volumes:
             - ./var/lib/grafana_data:/var/lib/grafana
         environment:
