@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-redis": "*",
+        "artprima/prometheus-metrics-bundle": "^1.20",
         "cboden/ratchet": "0.4.x-dev",
         "doctrine/dbal": "^3.10.4",
         "doctrine/doctrine-bundle": "^2.18.1",
