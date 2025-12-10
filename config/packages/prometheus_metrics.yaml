@@ -1,5 +1,5 @@
 artprima_prometheus_metrics:
-    namespace: socnet
+    namespace: symfony
     storage:
         url: 'redis://%env(resolve:REDIS_HOST)%'
         type: redis
