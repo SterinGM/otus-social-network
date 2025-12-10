@@ -1,12 +1,10 @@
 global:
-  scrape_interval: 15s # Scrape targets every 15 seconds
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'socnet_metrics'
-    # 'symfony_app' is the service name from docker-compose.yml
-    # Port 80 is the default web server port in the container
-    # '/metrics' is the endpoint provided by the Symfony bundle
+  - job_name: 'symfony-app'
     static_configs:
       - targets: ['nginx:80']
-
     metrics_path: '/metrics/prometheus'
+    scrape_interval: 5s
