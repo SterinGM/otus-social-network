@@ -121,6 +121,82 @@ services:
         networks:
             - app_network
 
+    zabbix-server:
+        image: zabbix/zabbix-server-mysql:alpine-6.4-latest
+        container_name: zabbix-server
+        restart: unless-stopped
+        ports:
+            - "10051:10051"
+        environment:
+            - DB_SERVER_HOST=zabbix-mysql
+            - MYSQL_DATABASE=zabbix
+            - MYSQL_USER=zabbix
+            - MYSQL_PASSWORD=zabbix_password
+            - MYSQL_ROOT_PASSWORD=root_password
+        depends_on:
+            - zabbix-mysql
+        networks:
+            - app_network
+
+    zabbix-web:
+        image: zabbix/zabbix-web-apache-mysql:alpine-6.4-latest
+        container_name: zabbix-web
+        restart: unless-stopped
+        ports:
+            - 127.0.0.1:580:8080
+        environment:
+            - ZBX_SERVER_HOST=zabbix-server
+            - DB_SERVER_HOST=zabbix-mysql
+            - MYSQL_DATABASE=zabbix
+            - MYSQL_USER=zabbix
+            - MYSQL_PASSWORD=zabbix_password
+            - MYSQL_ROOT_PASSWORD=root_password
+            - PHP_TZ=Europe/Moscow
+        depends_on:
+            - zabbix-mysql
+            - zabbix-server
+        networks:
+            - app_network
+
+    zabbix-mysql:
+        image: mysql:8.0
+        container_name: zabbix-mysql
+        restart: unless-stopped
+        environment:
+            - MYSQL_DATABASE=zabbix
+            - MYSQL_USER=zabbix
+            - MYSQL_PASSWORD=zabbix_password
+            - MYSQL_ROOT_PASSWORD=root_password
+        command:
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+            - --default-authentication-plugin=mysql_native_password
+        volumes:
+            - ./var/lib/zabbix_mysql_data:/var/lib/mysql
+            - ./var/lib/mysql-init:/docker-entrypoint-initdb.d
+        networks:
+            - app_network
+
+    zabbix-agent2:
+        image: zabbix/zabbix-agent2:latest
+        container_name: zabbix-agent2
+        hostname: zabbix-agent2
+        networks:
+            - app_network
+        environment:
+            ZBX_HOSTNAME: "zabbix-agent2"
+            # Основной сервер для активных проверок
+            ZBX_SERVER_HOST: "zabbix-server"
+            # Для пассивных проверок (сервер подключается к агенту)
+            ZBX_PASSIVESERVERS: ""
+            # Для активных проверок (агент подключается к серверу)
+            ZBX_ACTIVESERVERS: ""
+            # НЕ дублируйте значения!
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+        privileged: true
+        restart: unless-stopped
+
 networks:
     app_network:
         driver: bridge

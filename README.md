@@ -105,4 +105,5 @@ docker-compose exec php bin/console app:websocket:serve
 Для просмотра метрик доступны следующие адреса
 
 * [Prometheus](http://127.0.0.1:9190)
+* [Zabbix](http://127.0.0.1:580) (Admin:zabbix)
 * [Grafana](http://127.0.0.1:3100) (admin:admin)
