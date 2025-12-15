@@ -5,6 +5,7 @@ services:
         working_dir: /var/www/app
         depends_on:
             - php
+            - prometheus
         ports:
             - 127.0.0.1:8089:80
         volumes:
@@ -20,11 +21,13 @@ services:
         depends_on:
             - mariadb
             - rabbitmq
+            - zabbix-server
         environment:
             TIMEZONE: Europe/Moscow
             COMPOSER_MEMORY_LIMIT: -1
         volumes:
             - .:/var/www/app
+            - /var/run/docker.sock:/var/run/docker.sock:ro
         networks:
             - app_network
 
@@ -84,6 +87,131 @@ services:
             - ./var/lib/rabbitmq_data:/var/lib/rabbitmq
         networks:
             - app_network
+
+    prometheus:
+        container_name: socnet-prometheus
+        image: prom/prometheus:latest
+        ports:
+            - 127.0.0.1:9190:9090
+        volumes:
+            - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+            - '--web.enable-lifecycle'
+        networks:
+            - app_network
+
+    grafana:
+        container_name: socnet-grafana
+        image: grafana/grafana:latest
+        ports:
+            - 127.0.0.1:3100:3000
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+            - GF_INSTALL_PLUGINS=
+            - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+            - GF_FEATURE_TOGGLES_ENABLE=
+            - GF_LOG_LEVEL=info
+            - GF_SERVER_SERVE_FROM_SUB_PATH=false
+            - GF_SERVER_ROOT_URL=http://127.0.0.1:3100
+        volumes:
+            - ./var/lib/grafana_data:/var/lib/grafana
+            - ./docker/grafana/provisioning:/etc/grafana/provisioning
+        networks:
+            - app_network
+
+    zabbix-server:
+        image: zabbix/zabbix-server-mysql:alpine-6.4-latest
+        container_name: zabbix-server
+        restart: unless-stopped
+        ports:
+            - "10051:10051"
+        environment:
+            - DB_SERVER_HOST=zabbix-mysql
+            - MYSQL_DATABASE=zabbix
+            - MYSQL_USER=zabbix
+            - MYSQL_PASSWORD=zabbix_password
+            - MYSQL_ROOT_PASSWORD=root_password
+        depends_on:
+            - zabbix-mysql
+        networks:
+            - app_network
+
+    zabbix-web:
+        image: zabbix/zabbix-web-apache-mysql:alpine-6.4-latest
+        container_name: zabbix-web
+        restart: unless-stopped
+        ports:
+            - 127.0.0.1:580:8080
+        environment:
+            - ZBX_SERVER_HOST=zabbix-server
+            - DB_SERVER_HOST=zabbix-mysql
+            - MYSQL_DATABASE=zabbix
+            - MYSQL_USER=zabbix
+            - MYSQL_PASSWORD=zabbix_password
+            - MYSQL_ROOT_PASSWORD=root_password
+            - PHP_TZ=Europe/Moscow
+        depends_on:
+            - zabbix-mysql
+            - zabbix-server
+        networks:
+            - app_network
+
+    zabbix-mysql:
+        image: mysql:8.0
+        container_name: zabbix-mysql
+        restart: unless-stopped
+        environment:
+            - MYSQL_DATABASE=zabbix
+            - MYSQL_USER=zabbix
+            - MYSQL_PASSWORD=zabbix_password
+            - MYSQL_ROOT_PASSWORD=root_password
+        command:
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+            - --default-authentication-plugin=mysql_native_password
+        volumes:
+            - ./var/lib/zabbix_mysql_data:/var/lib/mysql
+            - ./var/lib/mysql-init:/docker-entrypoint-initdb.d
+        networks:
+            - app_network
+
+    zabbix-agent2:
+        image: zabbix/zabbix-agent2:latest
+        container_name: zabbix-agent
+        networks:
+            - app_network
+        environment:
+            ZBX_HOSTNAME: "zabbix-agent2"
+            ZBX_SERVER_HOST: "zabbix-server"
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+        privileged: true
+        restart: unless-stopped
+
+    php-zabbix-agent:
+        image: zabbix/zabbix-agent2:latest
+        container_name: socnet-php-zabbix-agent
+        depends_on:
+            - zabbix-server
+            - nginx
+            - php
+        networks:
+            - app_network
+        environment:
+            ZBX_HOSTNAME: "socnet-php"
+            ZBX_SERVER_HOST: "zabbix-server"
+            ZBX_METADATA: "php"
+            ZBX_ALLOWKEY: system.run[*]
+        volumes:
+            - ./docker/php/zabbix/zabbix_agent2.conf:/etc/zabbix/zabbix_agent2.d/custom.conf:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        privileged: true
+        user: "root"
+        restart: unless-stopped
 
 networks:
     app_network:
