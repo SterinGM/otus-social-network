@@ -21,11 +21,13 @@ services:
         depends_on:
             - mariadb
             - rabbitmq
+            - zabbix-server
         environment:
             TIMEZONE: Europe/Moscow
             COMPOSER_MEMORY_LIMIT: -1
         volumes:
             - .:/var/www/app
+            - /var/run/docker.sock:/var/run/docker.sock:ro
         networks:
             - app_network
 
@@ -179,22 +181,36 @@ services:
 
     zabbix-agent2:
         image: zabbix/zabbix-agent2:latest
-        container_name: zabbix-agent2
-        hostname: zabbix-agent2
+        container_name: zabbix-agent
         networks:
             - app_network
         environment:
             ZBX_HOSTNAME: "zabbix-agent2"
-            # Основной сервер для активных проверок
             ZBX_SERVER_HOST: "zabbix-server"
-            # Для пассивных проверок (сервер подключается к агенту)
-            ZBX_PASSIVESERVERS: ""
-            # Для активных проверок (агент подключается к серверу)
-            ZBX_ACTIVESERVERS: ""
-            # НЕ дублируйте значения!
         volumes:
             - /etc/localtime:/etc/localtime:ro
         privileged: true
+        restart: unless-stopped
+
+    php-zabbix-agent:
+        image: zabbix/zabbix-agent2:latest
+        container_name: socnet-php-zabbix-agent
+        depends_on:
+            - zabbix-server
+            - nginx
+            - php
+        networks:
+            - app_network
+        environment:
+            ZBX_HOSTNAME: "socnet-php"
+            ZBX_SERVER_HOST: "zabbix-server"
+            ZBX_METADATA: "php"
+            ZBX_ALLOWKEY: system.run[*]
+        volumes:
+            - ./docker/php/zabbix/zabbix_agent2.conf:/etc/zabbix/zabbix_agent2.d/custom.conf:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        privileged: true
+        user: "root"
         restart: unless-stopped
 
 networks:
